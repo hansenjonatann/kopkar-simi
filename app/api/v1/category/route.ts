@@ -6,7 +6,7 @@ const db = new PrismaClient()
 
 export const GET = async (req: NextRequest ) => {
     const page = Number(req.nextUrl.searchParams.get('page')) || 1
-    const limit = 10 
+    const limit = 5
 
     try {
         const offset = (page - 1) * limit 
@@ -26,7 +26,7 @@ export const GET = async (req: NextRequest ) => {
                 pagination: {
                     total: totalCategories , 
                     limit , 
-                    offset
+                    currentpage: page
                 }
             }, 
 

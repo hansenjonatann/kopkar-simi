@@ -46,7 +46,9 @@ export const GET = async (req: NextRequest ) => {
 export const POST = async (req: NextRequest) => {
     const body = await req.json()
 
-    const generateRandomCode = `899${Math.floor(Math.random() * 10000 + 5000)}`
+    const generateRandomCode = `899${Math.floor(Math.random() * 10000000000)
+        .toString()
+        .padStart(9, "0")}`;
 
     const newProduct = await db.product.create({
         data: {
