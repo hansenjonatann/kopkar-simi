@@ -44,7 +44,7 @@ export default function SignInPage  ()  {
 
         } catch (error) {
             setLoading(false)
-            console.error(error)
+            console.log(error)
             toast.error('Something went wrong. Please try again.')
         }
     }
