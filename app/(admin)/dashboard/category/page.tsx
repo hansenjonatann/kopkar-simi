@@ -6,7 +6,7 @@ import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function DashboardCategoryPage() {
-    const [page , setPage] = useState(0)
+  const [page , setPage] = useState(0)
   const [isModal, setIsModal] = useState(false);
   const [categories, setCategories] = useState([]);
   const [name , setName] = useState('')
@@ -74,7 +74,7 @@ export default function DashboardCategoryPage() {
           </button>
         </div>
         <div className="mt-8">
-          <table className="table-auto w-full ">
+          <table className="table-default">
             <thead>
               <tr>
                 <th className="border-t border-r border-l border-gray-500">#</th>

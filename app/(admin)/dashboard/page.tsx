@@ -47,14 +47,14 @@ export default function Dashboardpage () {
                 <div className="bg-white bg-opacity-50 w-full h-[100px] shadow-lg rounded-lg">
                     <div className="flex flex-col text-white">
                         <h1 className="text-center text-xl font-bold m-3">Total Penjualan Hari Ini</h1>
-                        <h1 className="text-center text-xl text-green-300 font-bold mt-2">Rp <span>{totalSalesToday.toLocaleString('id')}</span></h1>
+                        <h1 className="text-center text-xl text-green-300 font-bold mt-2">Rp <span>{totalSalesToday}</span></h1>
                    
                     </div>
                 </div>
                 <div className="bg-white bg-opacity-50 w-full h-[100px] shadow-lg rounded-lg">
                     <div className="flex flex-col text-white">
                         <h1 className="text-center text-xl font-bold m-3">Total Penjualan Periode {monthName}</h1>
-                        <h1 className="text-center text-xl text-green-300 font-bold mt-2">Rp <span>{totalSalesPerMonth.toLocaleString('id')}</span></h1>
+                        <h1 className="text-center text-xl text-green-300 font-bold mt-2">Rp <span>{totalSalesPerMonth}</span></h1>
                    
                     </div>
                 </div>

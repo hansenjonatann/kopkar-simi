@@ -145,7 +145,7 @@ export default function DashboardProductPage() {
             <div className="flex flex-col m-3 ">
                 <h1 className="font-bold">Add New Product Form</h1>
                 <form onSubmit={handleCreateProduct} method="POST" >
-                    <CustomForm variant="light" label="Name" type="text" name="name" onchange={(e) => setName(e.target.value)}/>
+                    <CustomForm variant="dark" label="Name" type="text" name="name" onchange={(e) => setName(e.target.value)}/>
                         <div className="my-4 flex flex-col">
                             <label htmlFor="categoryId">Category</label>
                             <select name="categoryId" id="categoryId" className="w-full p-2 border border-black rounded-md" onChange={(e) => setCategoryId(e.target.value)}>
@@ -155,9 +155,9 @@ export default function DashboardProductPage() {
                                 ))}
                             </select>
                         </div>
-                    <CustomForm variant="light" label="Cost" type="number" name="cost" onchange={(e) => setCost(Number(e.target.value))}/>
-                    <CustomForm variant="light" label="Price" type="number" name="price" onchange={(e) => setPrice(Number(e.target.value))}/>
-                    <CustomForm variant="light" label="Stock" type="number" name="stock" onchange={(e) => setStock(Number(e.target.value))}/>
+                    <CustomForm variant="dark" label="Cost" type="number" name="cost" onchange={(e) => setCost(Number(e.target.value))}/>
+                    <CustomForm variant="dark" label="Price" type="number" name="price" onchange={(e) => setPrice(Number(e.target.value))}/>
+                    <CustomForm variant="dark" label="Stock" type="number" name="stock" onchange={(e) => setStock(Number(e.target.value))}/>
                     <div className="my-2 flex flex-col">
                             <label htmlFor="description">Description</label>
                             <textarea name="description" onChange={(e) => setDescription(e.target.value)} className="w-full p-2 border border-black rounded-md" id="description"></textarea>

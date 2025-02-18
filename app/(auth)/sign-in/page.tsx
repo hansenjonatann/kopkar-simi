@@ -1,7 +1,8 @@
 'use client'
 
 import CustomForm from "@/components/custom-form"
-import { signIn, useSession } from "next-auth/react"
+import { useRole } from "@/hooks/use-role"
+import { signIn } from "next-auth/react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -11,7 +12,8 @@ export default function SignInPage  ()  {
     const [username , setUsername] = useState<string>('')
     const [password , setPassword] = useState<string>('')
     const [loading , setLoading] = useState(false)
-    const {data : session} = useSession()
+    const {role} = useRole()
+    
     const router = useRouter()
     const handleLogin = async (e: any) => {
         e.preventDefault()
@@ -25,7 +27,6 @@ export default function SignInPage  ()  {
 
 
             setLoading(false) // Pastikan loading di-reset
-            console.log(session)
 
             if (!res || res.error) {
                 // Login gagal
@@ -35,10 +36,10 @@ export default function SignInPage  ()  {
             }
 
             // Login berhasil
-            if(session?.user?.role === 'ADMIN') {
+            if(role === 'ADMIN') {
                 router.push('/dashboard')
 
-            }else if (session?.user?.role === 'CASHIER') {
+            }else if (role === 'CASHIER') {
                 router.push('/cashier/transaction')
             }
 
@@ -52,7 +53,7 @@ export default function SignInPage  ()  {
 
     return (
         <div className="flex items-center bg-primary h-screen justify-center">
-            <form method="POST"  onSubmit={handleLogin} className="border bg-gradient-to-tr from-primary to-secondary p-6 w-[400px] h-[360px] rounded-md shadow-lg" autoComplete="false">
+            <form method="POST"  onSubmit={handleLogin} className="border bg-gradient-to-tr from-primary to-secondary p-6 w-[400px] h-[390px] rounded-md shadow-lg" autoComplete="false">
                 
                 <h1 className="text-center text-3xl font-bold text-accsent">
                     SIGN IN
