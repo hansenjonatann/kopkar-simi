@@ -14,6 +14,11 @@ export default function Sidebar () {
 
     const pathname = usePathname()
     const masterList = [
+        {
+            id: 1,
+            label: 'User' , 
+            path: '/dashboard/user'
+        },
      
         {
             id: 2,
