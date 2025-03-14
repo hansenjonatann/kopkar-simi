@@ -11,6 +11,7 @@ export const POST = async (req: NextRequest) => {
     data: {
       saleId: body.saleId,
       paymentAmount: body.paymentAmount,
+      paymentmethod: body.paymentmethod,
       change: body.change,
     },
   });

@@ -64,7 +64,6 @@ export const POST = async (req: NextRequest) => {
                     }))
                 } ,
                 subtotal: body.subtotal,
-                paymentmethod : body.paymentmethod
     
             }
         })

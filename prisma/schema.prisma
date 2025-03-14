@@ -14,94 +14,88 @@ datasource db {
 }
 
 model User {
-  id String @id @default(uuid())
-  name String 
-  username String 
-  password String 
-  role Role  
+  id        String   @id @default(uuid())
+  name      String
+  username  String
+  password  String
+  role      Role
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-
-
 model Product {
-  id          String          @id @default(uuid())
+  id          String   @id @default(uuid())
   name        String
-  code         String       
+  code        String
   description String?
-  price       Int          @default(0)
-  cost        Int          @default(0)
-  stock       Int          @default(0)
+  price       Int      @default(0)
+  cost        Int      @default(0)
+  stock       Int      @default(0)
   categoryId  String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  category Category @relation(fields: [categoryId] , references: [id])
-  SaleItems   SaleItem[]
+  category      Category       @relation(fields: [categoryId], references: [id])
+  SaleItems     SaleItem[]
   InventoryLogs InventoryLog[]
 }
 
 model Category {
-  id          String       @id @default(uuid())
-  name        String    
+  id          String   @id @default(uuid())
+  name        String
   slug        String
   description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  products    Product[]
+  products Product[]
 }
 
 model Sale {
-  id          String   @id @default(uuid())
+  id          String        @id @default(uuid())
   date        String
   discount    Int?
   subtotal    Int
   total       Int
-  paymentmethod PaymentMethod 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
   transaction Transaction[]
-  SaleItems SaleItem[]
+  SaleItems   SaleItem[]
 }
 
 model Transaction {
-  id            Int       @id @default(autoincrement())
+  id            Int           @id @default(autoincrement())
   saleId        String
-  paymentAmount Float
-  change        Float
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  paymentAmount Int
+  change        Int
+  paymentmethod PaymentMethod
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
-  Sale          Sale      @relation(fields: [saleId], references: [id])
+  Sale Sale @relation(fields: [saleId], references: [id])
 }
-
 
 model SaleItem {
-  id          String       @id @default(uuid())
-  saleId      String
-  productId   String
-  quantity    Int       @default(1)
-  unitPrice   Int       @default(0)
-  
+  id        String @id @default(uuid())
+  saleId    String
+  productId String
+  quantity  Int    @default(1)
+  unitPrice Int    @default(0)
 
-  Sale        Sale      @relation(fields: [saleId], references: [id])
-  Product     Product   @relation(fields: [productId], references: [id])
+  Sale    Sale    @relation(fields: [saleId], references: [id])
+  Product Product @relation(fields: [productId], references: [id])
 }
 
-
-
 model InventoryLog {
-  id          Int       @id @default(autoincrement())
-  productId   String
-  changeType  ChangeType 
-  quantity    Int
-  note        String?
-  createdAt   DateTime  @default(now())
-  date String
+  id         Int        @id @default(autoincrement())
+  productId  String
+  changeType ChangeType
+  quantity   Int
+  note       String?
+  createdAt  DateTime   @default(now())
+  date       String
 
-  Product     Product   @relation(fields: [productId], references: [id])
+  Product Product @relation(fields: [productId], references: [id])
 }
 
 enum ChangeType {
@@ -117,7 +111,7 @@ enum PaymentMethod {
 }
 
 enum Role {
-  ADMIN 
+  ADMIN
   CASHIER
   MANAGER
 }
