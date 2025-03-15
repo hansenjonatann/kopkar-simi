@@ -29,7 +29,7 @@ export const authOptions : AuthOptions = {
                     throw new Error("Kata sandi salah");
                   }
           
-                  return { id: user.id, username: user.username, role: user.role };
+              return { id: user.id, username: user.username, role: user.role, name: user.name };
             }
         }) 
     ],
@@ -45,7 +45,8 @@ export const authOptions : AuthOptions = {
             if(user) {
                 token.id = user.id 
                 token.username = user.username 
-                token.role = user.role
+              token.role = user.role
+              token.name = user.name
             }
             return token
         },
@@ -54,10 +55,11 @@ export const authOptions : AuthOptions = {
                 session.user = {
                     id: token.id ,
                     username: token.username , 
-                    role: token.role
+                    role: token.role,
+                    name: token.name  
                 }
             }
-            return session
+          return session
         }
     },
     secret: process.env.NEXTAUTH_SECRET

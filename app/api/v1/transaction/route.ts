@@ -10,9 +10,9 @@ export const POST = async (req: NextRequest) => {
   const transaction = await db.transaction.create({
     data: {
       saleId: body.saleId,
-      paymentAmount: body.paymentAmount,
+      paymentAmount: Number(body.paymentAmount),
       paymentmethod: body.paymentmethod,
-      change: body.change,
+      change: Number(body.change),
     },
   });
 

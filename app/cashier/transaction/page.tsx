@@ -4,19 +4,17 @@ import { addItem, updateItemQuantity } from "@/lib/statemanagement/item/slice";
 import { RootState } from "@/lib/statemanagement/item/store";
 import axios from "axios";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function CashierTransactionPage() {
   const pathname = usePathname();
-  const [isPaymentModalVisible, setIsPaymentModalVisible] = useState(false);
   const [discount, setDiscount] = useState(0);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
-  const [paymentAmount, setPaymentAmount] = useState(0);
   const [code, setCode] = useState(0);
   const dispatch = useDispatch();
-
+  const router = useRouter();
   const items = useSelector((state: RootState) => state.items.items);
 
   const subtotal = items.reduce(
@@ -26,6 +24,28 @@ export default function CashierTransactionPage() {
 
   const total = subtotal - discount;
 
+  const handlePayment = async (e: FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}sale`, {
+        items: items.map((item: any) => ({
+          quantity: item.quantity,
+          unitPrice: item.price,
+          productId: item.id,
+        })),
+        discount,
+        subtotal,
+        total,
+      });
+
+      if (res) {
+        toast.success(res.data.message);
+        router.push(`/cashier/payment/?id=${res.data.data.id}`);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const fetchProducts = async (code: number) => {
     try {
       const res = await axios.get(
@@ -40,22 +60,6 @@ export default function CashierTransactionPage() {
     } catch (error) {
       console.log("Error fetching product:", error);
     }
-  };
-
-  const paymentOptions = [
-    { id: 1, label: "CASH", value: "CASH" },
-    { id: 2, label: "CARD", value: "CARD" },
-    { id: 3, label: "DIGITAL", value: "DIGITAL" },
-  ];
-
-  // Function to show the payment modal
-  const handleShowPaymentModal = () => {
-    setIsPaymentModalVisible(true);
-  };
-
-  // Function to close the payment modal
-  const handleClosePaymentModal = () => {
-    setIsPaymentModalVisible(false);
   };
 
   const handleInputCode = (e: FormEvent) => {
@@ -75,7 +79,7 @@ export default function CashierTransactionPage() {
   return (
     <>
       <div className="m-4">
-        <form action="">
+        <form onSubmit={handlePayment} method="POST">
           <div className="grid grid-cols-1 md:grid-cols-2">
             <div>
               <div className="my-4 flex gap-x-2">
@@ -186,10 +190,9 @@ export default function CashierTransactionPage() {
               </div>
               {/* Bayar Button */}
               <button
-                onClick={() => {
-                  handleShowPaymentModal();
-                }}
-                className="bg-red-600 p-2 mt-4 rounded-md font-bold"
+                type="submit"
+                onClick={handlePayment}
+                className="bg-green-600 p-2 mt-4 text-white rounded-md font-bold"
               >
                 Bayar ( F8 )
               </button>
@@ -213,59 +216,6 @@ export default function CashierTransactionPage() {
           </Link>
         ))}
       </div>
-
-      {/* Payment Modal */}
-      {isPaymentModalVisible && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white text-black rounded-md shadow-md p-6 w-1/3">
-            <h1 className="text-2xl font-bold mb-4">Pembayaran</h1>
-            <form action="">
-              <div className="my-4 flex flex-col">
-                <label htmlFor="paymentmethod">Metode Pembayaran</label>
-                <select
-                  value={selectedPaymentMethod}
-                  onChange={(e) => setSelectedPaymentMethod(e.target.value)}
-                  className="p-2 rounded-md text-black"
-                >
-                  <option value="">Pilih Metode Pembayaran</option>
-                  {paymentOptions.map((payment, index) => (
-                    <option key={index} value={payment.value}>
-                      {payment.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {selectedPaymentMethod === "CASH" && (
-                <div className="my-4 flex flex-col">
-                  <label htmlFor="paymentAmount">Jumlah Uang Dibayarkan</label>
-                  <input
-                    type="number"
-                    id="paymentAmount"
-                    className="p-2 rounded-md text-black"
-                    onChange={(e) => setPaymentAmount(Number(e.target.value))}
-                  />
-                  <pre className="mt-4">
-                    Rp {paymentAmount.toLocaleString("id")}
-                  </pre>
-                </div>
-              )}
-
-              <div className="flex gap-3">
-                <button
-                  onClick={handleClosePaymentModal}
-                  className="bg-gray-500 text-white px-4 py-2 rounded-md mt-4"
-                >
-                  Tutup
-                </button>
-                <button className="bg-green-500 text-white px-4 py-2 rounded-md mt-4">
-                  Bayar ( Enter )
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </>
   );
 }

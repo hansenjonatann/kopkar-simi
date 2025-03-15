@@ -1,12 +1,15 @@
 "use client";
 import { useRole } from "@/hooks/use-role";
-import { signOut } from "next-auth/react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function Sidebar() {
   const { role } = useRole();
 
+  const router = useRouter();
+  const handleSignOut = async () => {
+    router.push("/sign-in");
+  };
   const pathname = usePathname();
   const masterList = [
     {
@@ -79,7 +82,6 @@ export default function Sidebar() {
               </Link>
             ))}
           </div>
-          rafce
         </div>
         <div className="mt-4">
           <h1
@@ -109,9 +111,7 @@ export default function Sidebar() {
 
           <div className="mt-4">
             <button
-              onClick={async () => {
-                await signOut();
-              }}
+              onClick={handleSignOut}
               className="bg-red-500 text-white font-bold px-2 py-2 rounded-md  w-full"
             >
               Sign Out
