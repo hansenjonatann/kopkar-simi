@@ -50,10 +50,8 @@ export default function DashboardAddInventory() {
         changeType,
         productId
     })
-    console.log(res)
     toast.success(res.data.message)
     router.push('/dashboard/inventory')
-    console.log(res)
   }
 
   return (

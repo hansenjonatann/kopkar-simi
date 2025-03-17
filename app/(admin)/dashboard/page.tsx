@@ -43,19 +43,24 @@ export default function Dashboardpage() {
   };
 
   useEffect(() => {
-    fetchSalesToday();
+    const interval = setInterval(() => {
+      fetchSalesToday();
+    } , 3000)
     fetchSalesMonth();
+
+    return () => clearInterval(interval)
+    
   }, []);
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <DashboardCard
           title="Total Penjualan Hari ini"
-          content={`Rp ${totalSalesToday == 0 ? "-" : totalSalesToday.toLocaleString("id")}`}
+          content={`Rp ${totalSalesToday == 0 ? "-" : totalSalesToday > 0 ? totalSalesToday.toLocaleString("id") : 0} `}
         />
         <DashboardCard
           title={`Total Penjualan bulan : ${monthName}`}
-          content={`Rp ${totalSalesPerMonth == 0 ? "-" : totalSalesPerMonth.toLocaleString("id")}`}
+          content={`Rp ${totalSalesPerMonth == 0 ? "-" : totalSalesPerMonth?.toLocaleString("id")}`}
         />
       </div>
       <div className="mt-4">

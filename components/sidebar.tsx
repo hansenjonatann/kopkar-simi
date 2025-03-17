@@ -1,10 +1,17 @@
 "use client";
 import { useRole } from "@/hooks/use-role";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function Sidebar() {
   const { role } = useRole();
+  const [isDropdown , setIsDropDown] = useState(false)
+
+  const handleDropdownToggle  = () => setIsDropDown(!isDropdown)
+
+  
 
   const router = useRouter();
   const handleSignOut = async () => {
@@ -25,8 +32,8 @@ export default function Sidebar() {
     },
     {
       id: 3,
-      label: "Sale",
-      path: "/dashboard/sale",
+      label: "Inventory",
+      path: "/dashboard/inventory",
     },
     {
       id: 4,
@@ -35,8 +42,8 @@ export default function Sidebar() {
     },
     {
       id: 5,
-      label: "Inventory",
-      path: "/dashboard/inventory",
+      label: "Sale",
+      path: "/dashboard/sale"
     },
   ];
 
@@ -67,20 +74,37 @@ export default function Sidebar() {
           </div>
 
           <h1 className="text-gray-400 font-bold mt-8">Master</h1>
-          <div className="flex flex-col space-y-2">
+          <div className="flex flex-col  space-y-2">
             {masterList.map((list: any, index: number) => (
-              <Link
-                key={index}
-                href={list.path}
-                className={
-                  pathname === list.path
-                    ? "mt-3 bg-secondary text-primary p-2 rounded-md w-full"
-                    : "mt-3   text-secondary hover:bg-secondary hover:text-primary  p-2 rounded-md w-full"
-                }
-              >
-                {list.label}
-              </Link>
+              <div key={index} className="flex items-center">
+                <Link
+                  href={list.path}
+                  className={
+                    pathname === list.path
+                      ? "mt-3 bg-secondary text-primary p-2 rounded-md w-full"
+                      : "mt-3   text-secondary hover:bg-secondary hover:text-primary  p-2 rounded-md w-full"
+                  }
+                >
+                  {list.label}
+                </Link>
+                {list.label == "Sale" ? (
+                  <button onClick={handleDropdownToggle} className="mt-3">
+                    {isDropdown ? <ChevronUp /> : <ChevronDown/>}
+                  </button>
+                ) : null}
+              </div>
             ))}
+
+            {isDropdown ? (
+              <div className="flex flex-col">
+                <Link
+                  href={"/dashboard/sales_return"}
+                  className="mt-3   text-secondary hover:bg-secondary hover:text-primary  p-2 rounded-md w-full"
+                >
+                  Sales Return
+                </Link>
+              </div>
+            ) : null}
           </div>
         </div>
         <div className="mt-4">
