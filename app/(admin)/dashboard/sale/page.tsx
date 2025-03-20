@@ -4,6 +4,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -17,7 +18,9 @@ function SalesContent() {
   const router = useRouter();
   const page = Number(searchParams.get("page")) || 1;
   const [sales, setSales] = useState([]);
-//   const [selectedDate , setSelectedDate] = useState('')
+  const [selectedDate , setSelectedDate] = useState('')
+  const [filteredSales , setFilteredSales] = useState([])
+  const [summarize , setSummarize] = useState(0)
 
   // Fetch Sales Data
   const fetchSales = async () => {
@@ -38,13 +41,43 @@ function SalesContent() {
     router.push(`?${params.toString()}`);
   };
 
+
+  const fetchSalesByDate = async (date: string) => {
+    try {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sales/filter/date?date=${date}`)
+      setFilteredSales(res.data.data)
+      setSummarize(res.data.total._sum.total)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+
+
   useEffect(() => {
-    fetchSales();
-  }, [page]);
+    fetchSales();  
+    fetchSalesByDate(selectedDate)
+  }, [page , selectedDate]);
 
   return (
     <>
       <h1 className="text-xl font-bold">Sale</h1>
+      <div className="mt-4 flex items-center">
+        <div className="flex flex-col">
+          <p>Filter by Date </p>
+          <select
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="bg-primary text-white  px-3 mt-4 rounded-md "
+          >
+            <option value="">Select date of sale</option>
+            {sales.map((sale: any, index: number) => (
+              <option key={index} value={sale.date}>
+                {sale.date}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
       <div className="mt-8">
         <Table>
           <TableHeader>
@@ -58,33 +91,83 @@ function SalesContent() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sales.map(
-              (
-                sale: {
-                  date: string;
-                  discount: number;
-                  subtotal: number;
-                  total: number;
-                },
-                index: number
-              ) => (
-                <TableRow key={index}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>{sale.date}</TableCell>
-                  <TableCell>{sale.subtotal.toLocaleString("id")}</TableCell>
-                  <TableCell>{sale.discount.toLocaleString("id")}</TableCell>
-                  <TableCell>{sale.total.toLocaleString("id")}</TableCell>
-                  {/* <TableCell>
+            {selectedDate
+              ? filteredSales.map(
+                  (
+                    sale: {
+                      date: string;
+                      discount: number;
+                      subtotal: number;
+                      total: number;
+                    },
+                    index: number
+                  ) => (
+                    <TableRow key={index}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{sale.date}</TableCell>
+                      <TableCell>
+                        {sale.subtotal.toLocaleString("id")}
+                      </TableCell>
+                      <TableCell>
+                        {sale.discount.toLocaleString("id")}
+                      </TableCell>
+                      <TableCell>{sale.total.toLocaleString("id")}</TableCell>
+                      {/* <TableCell>
+                    <Button variant="destructive">
+                    <TrashIcon />
+                    </Button>
+                    </TableCell> */}
+                    </TableRow>
+                  )
+                )
+              : sales.map(
+                  (
+                    sale: {
+                      date: string;
+                      discount: number;
+                      subtotal: number;
+                      total: number;
+                    },
+                    index: number
+                  ) => (
+                    <TableRow key={index}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{sale.date}</TableCell>
+                      <TableCell>
+                        {sale.subtotal.toLocaleString("id")}
+                      </TableCell>
+                      <TableCell>
+                        {sale.discount.toLocaleString("id")}
+                      </TableCell>
+                      <TableCell>{sale.total.toLocaleString("id")}</TableCell>
+                      {/* <TableCell>
                     <Button variant="destructive">
                       <TrashIcon />
                     </Button>
                   </TableCell> */}
-                </TableRow>
-              )
-            )}
+                    </TableRow>
+                  )
+                )}
           </TableBody>
+          {summarize ? (
+            <TableFooter>
+              <TableRow className="">
+                <TableCell className="">Total</TableCell>
+                <TableCell className=""></TableCell>
+                <TableCell className=""></TableCell>
+                <TableCell className=""></TableCell>
+                <TableCell className="font-bold">
+                  {summarize.toLocaleString("id")}
+                </TableCell>
+              </TableRow>
+            </TableFooter>
+          ) : null}
         </Table>
-        <div className="flex justify-end mt-8 mr-28 space-x-8">
+        <div
+          className={
+            selectedDate ? "hidden" : "flex justify-end mt-8 mr-28 space-x-8"
+          }
+        >
           <Button
             variant="default"
             disabled={page <= 1}

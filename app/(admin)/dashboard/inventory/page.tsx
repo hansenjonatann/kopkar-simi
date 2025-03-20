@@ -31,7 +31,7 @@ export default function DashboardInventory () {
 
   useEffect(() => {
     fetchInventory()
-  } , [])
+  } , [page])
     return (
         <>
         <h1 className=" font-bold">Dashboard / Inventory</h1>
@@ -58,7 +58,9 @@ export default function DashboardInventory () {
                           <td className="border border-gray-500 text-center my-3">{inv.date}</td>
                           <td className="border border-gray-500 text-center my-3">{inv.Product.name}</td>
                           <td className="border border-gray-500 text-center my-3">{inv.quantity}</td>
-                          <td className="border border-gray-500 text-center my-3">{inv.changeType}</td>
+                          <td className="border border-gray-500 text-center my-3">
+                            <div className={inv.changeType == 'PURCHASE' ? 'bg-blue-600  mx-auto p-2 my-2 w-52 text-white rounded-md' : 'bg-green-600 p-2 mx-auto my-2 w-52 text-white rounded-md'} >{inv.changeType}</div>
+                          </td>
                           {/* <td className="border border-gray-500 text-center my-3">
                             <button onClick={() => handleDelete(inv.id)} className="bg-red-500 text-white p-2 m-2 rounded-md">
                               Delete

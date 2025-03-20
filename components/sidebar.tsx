@@ -1,9 +1,11 @@
 "use client";
 import { useRole } from "@/hooks/use-role";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function Sidebar() {
   const { role } = useRole();
@@ -15,8 +17,16 @@ export default function Sidebar() {
 
   const router = useRouter();
   const handleSignOut = async () => {
-    router.push("/sign-in");
+     await signOut({redirect: false , callbackUrl: '/sign-in'}).then(
+      () => {
+        localStorage.removeItem('token')
+        toast.success('Logout success')
+        router.push("/sign-in");
+      }
+     )
+    
   };
+
   const pathname = usePathname();
   const masterList = [
     {

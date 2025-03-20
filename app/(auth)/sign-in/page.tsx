@@ -3,7 +3,7 @@
 import CustomForm from "@/components/custom-form";
 import { Button } from "@/components/ui/button";
 import { useRole } from "@/hooks/use-role";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,6 +14,7 @@ export default function SignInPage() {
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const { role } = useRole();
+  const session = useSession()
 
   const router = useRouter();
   const handleLogin = async (e: any) => {
@@ -26,21 +27,30 @@ export default function SignInPage() {
         redirect: false,
       });
 
-      setLoading(false); // Pastikan loading di-reset
+
+
 
       if (!res || res.error) {
+        setLoading(false)
         // Login gagal
         toast.error("Invalid Credentials!");
-        router.refresh(); // Refresh halaman
-        return;
       }
 
-      // Login berhasil
-      if (role === "ADMIN") {
-        router.push("/dashboard");
-      } else if (role === "CASHIER") {
-        router.push("/cashier/transaction");
+      if(res) {
+        setLoading(false)
+        if (role === "ADMIN" || role === 'MANAGER') {
+          setLoading(false);
+          localStorage.setItem("token", String(session.data?.user.id));
+          router.push("/dashboard");
+        } else if (role === "CASHIER") {
+          setLoading(false);
+          localStorage.setItem("token", String(session.data?.user.id));
+
+          router.push("/cashier/transaction");
+        }
       }
+      // Login berhasil
+      
     } catch (error) {
       setLoading(false);
       console.log(error);

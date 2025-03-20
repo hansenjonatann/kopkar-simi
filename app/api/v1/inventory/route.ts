@@ -44,7 +44,7 @@ export const GET = async (req: NextRequest) => {
 
 export const POST = async (req: NextRequest) => {
     const body = await req.json()
-    const generateDate = new Date().toLocaleDateString().replaceAll('/' , '-')
+    const generateDate = new Date().toLocaleDateString('id').replaceAll('/' , '-')
     const inventory = await db.inventoryLog.create({
         data: {
           date: generateDate , // Pastikan tanggal yang benar

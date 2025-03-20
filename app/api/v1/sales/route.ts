@@ -7,6 +7,8 @@ export const GET = async () => {
     const sales = await db.sale.findMany({
       
     })
+    
+      
 
     return NextResponse.json({
         success: true,

@@ -4,7 +4,7 @@ import CustomForm from "@/components/custom-form";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { Suspense, FormEvent, useEffect, useState, useMemo } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import {  useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
 
@@ -21,7 +21,7 @@ function PaymentContent() {
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState("");
 
-  const router = useRouter();
+  // const router = useRouter();
   const generateChange = useMemo(
     () => (paymentAmount ?? 0) - total,
     [paymentAmount, total]
@@ -82,7 +82,9 @@ function PaymentContent() {
         payload
       );
       toast.success(res.data.message);
-      router.push("/cashier/transaction");
+      handlePrint()
+      // router.push("/cashier/transaction");
+      // router.refresh()
     } catch (error) {
       toast.error("Transaction failed");
       console.error("Error processing transaction:", error);
@@ -90,6 +92,10 @@ function PaymentContent() {
       setLoading(false);
     }
   };
+
+  const handlePrint = () => {
+    window.print()
+  }
 
   return (
     <div className="m-6">
@@ -165,6 +171,7 @@ function PaymentContent() {
             >
               {loading ? "Processing..." : "Pay"}
             </Button>
+
           </form>
         </div>
       </div>

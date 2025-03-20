@@ -7,7 +7,7 @@ import DashboardCard from "./_components/dashboard-card";
 export default function Dashboardpage() {
   const [totalSalesToday, setTotalSalesToday] = useState(0);
   const [totalSalesPerMonth, setTotalSalesPerMonth] = useState(0);
-  const date = new Date().toLocaleDateString().replaceAll("/", "-");
+  const date = new Date().toLocaleDateString('id').replaceAll("/", "-");
   const month = new Date().getMonth() + 1;
   const year = new Date().getFullYear();
 
@@ -30,9 +30,9 @@ export default function Dashboardpage() {
 
   const fetchSalesToday = async () => {
     const res = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}sales/filter/date/total/${date}`
+      `${process.env.NEXT_PUBLIC_API_URL}/sales/filter/date?date=${date}`
     );
-    setTotalSalesToday(res.data.data._sum.total);
+    setTotalSalesToday(res.data.total._sum.total);
   };
 
   const fetchSalesMonth = async () => {
@@ -50,7 +50,7 @@ export default function Dashboardpage() {
 
     return () => clearInterval(interval)
     
-  }, []);
+  }, [date , ]);
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

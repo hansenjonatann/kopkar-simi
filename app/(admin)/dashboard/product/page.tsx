@@ -90,7 +90,7 @@ export default function DashboardProductPage() {
           <div className="flex">
             <button
               onClick={handleModalOpen}
-              className="bg-blue-600 p-2 rounded-md"
+              className="bg-blue-600 text-white p-2 rounded-md"
             >
               Add a new Product
             </button>

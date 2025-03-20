@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { addItem, updateItemQuantity } from "@/lib/statemanagement/item/slice";
 import { RootState } from "@/lib/statemanagement/item/store";
 import axios from "axios";
+import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
@@ -46,6 +47,15 @@ export default function CashierTransactionPage() {
       console.log(error);
     }
   };
+
+  const handleSignOut = async () => {
+    await signOut({redirect: false , callbackUrl: '/sign-in'}).then(() => {
+      localStorage.removeItem("token");
+      toast.success('Logout success!')
+      router.push('/sign-in')
+
+    })
+  }
   const fetchProducts = async (code: number) => {
     try {
       const res = await axios.get(
@@ -87,7 +97,7 @@ export default function CashierTransactionPage() {
                   Date
                 </label>
                 <span>
-                  : {new Date().toLocaleDateString().replaceAll("/", " - ")}
+                  : {new Date().toLocaleDateString("id").replaceAll("/", " - ")}
                 </span>
               </div>
               <div className="my-4 flex gap-x-2">
@@ -124,13 +134,13 @@ export default function CashierTransactionPage() {
                 <tr>
                   <th className="border border-white text-center">#</th>
                   <th className="border border-white text-center">
-                    Nama Produk
+                    PRODUCT NAME
                   </th>
-                  <th className="border border-white text-center">Jumlah</th>
+                  <th className="border border-white text-center">QTY</th>
                   <th className="border border-white text-center">
-                    Harga Satuan
+                    @ PRICE
                   </th>
-                  <th className="border border-white text-center">Total</th>
+                  <th className="border border-white text-center">TOTAL</th>
                 </tr>
               </thead>
               <tbody>
@@ -194,7 +204,14 @@ export default function CashierTransactionPage() {
                 onClick={handlePayment}
                 className="bg-green-600 p-2 mt-4 text-white rounded-md font-bold"
               >
-                Bayar ( F8 )
+                Confirm
+              </button>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="bg-red-600 p-2 mt-4 text-white rounded-md font-bold"
+              >
+                Sign Out
               </button>
             </div>
           </div>

@@ -3,12 +3,21 @@ import { NextRequest, NextResponse } from "next/server";
 
 const db = new PrismaClient()
 
-export const GET = async (req: NextRequest , {params} : {params: Promise<{date: string}>}) => {
-    const date = (await params).date 
+export const GET = async (req: NextRequest ) => {
+    const date = req.nextUrl.searchParams.get('date')
 
     const filtersalebydate = await db.sale.findMany({
         where: {
-            date
+            date: String(date)
+        }
+    })
+
+    const totalSalesByDate = await db.sale.aggregate({
+        where: {
+            date: String(date)
+        } , 
+        _sum: {
+            total: true
         }
     })
 
@@ -16,6 +25,7 @@ export const GET = async (req: NextRequest , {params} : {params: Promise<{date: 
         success: true,
         message: 'Filter Sale by Date',
         data: filtersalebydate,
+        total: totalSalesByDate, 
         statusCode: 200
     });
 }

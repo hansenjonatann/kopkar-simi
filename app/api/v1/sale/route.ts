@@ -20,11 +20,17 @@ export const GET = async (req: NextRequest) => {
             skip: offset
         })
 
+        const uniqueSales = Array.from(new Set(sale.map((s) => s.date))).map(
+          (date) => {
+            return sale.find((s) => s.date === date);
+          }
+        );
+
         return NextResponse.json({
             success: true,
             message: 'List of Sale',
             data: {
-                sale: sale , 
+                sale: uniqueSales , 
                 pagination: {
                     total: totalsales , 
                     limit , 
@@ -48,7 +54,7 @@ export const POST = async (req: NextRequest) => {
 
     
     try {
-        const generateDate = new Date().toLocaleDateString().replaceAll('/' , '-')
+        const generateDate = new Date().toLocaleDateString('id').replaceAll('/' , '-')
         const newsale = await db.sale.create({
             data: {
                 date : generateDate, 
