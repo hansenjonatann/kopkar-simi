@@ -1,5 +1,4 @@
 "use client";
-import { useRole } from "@/hooks/use-role";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
@@ -8,23 +7,17 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 export default function Sidebar() {
-  const { role } = useRole();
-  const [isDropdown , setIsDropDown] = useState(false)
+  const [isDropdown, setIsDropDown] = useState(false);
 
-  const handleDropdownToggle  = () => setIsDropDown(!isDropdown)
-
-  
+  const handleDropdownToggle = () => setIsDropDown(!isDropdown);
 
   const router = useRouter();
   const handleSignOut = async () => {
-     await signOut({redirect: false , callbackUrl: '/sign-in'}).then(
-      () => {
-        localStorage.removeItem('token')
-        toast.success('Logout success')
-        router.push("/sign-in");
-      }
-     )
-    
+    await signOut({ redirect: false, callbackUrl: "/sign-in" }).then(() => {
+      localStorage.removeItem("token");
+      toast.success("Logout success");
+      router.push("/sign-in");
+    });
   };
 
   const pathname = usePathname();
@@ -53,22 +46,10 @@ export default function Sidebar() {
     {
       id: 5,
       label: "Sale",
-      path: "/dashboard/sale"
+      path: "/dashboard/sale",
     },
   ];
 
-  const reportList = [
-    {
-      id: 1,
-      label: "Inventory",
-      path: "/report/inventory",
-    },
-    {
-      id: 2,
-      label: "Sale",
-      path: "/report/sale",
-    },
-  ];
   return (
     <div className=" m-4 w-48 h-[700px] rounded-lg bg-primary text-secondary">
       <div className="m-3">
@@ -99,7 +80,7 @@ export default function Sidebar() {
                 </Link>
                 {list.label == "Sale" ? (
                   <button onClick={handleDropdownToggle} className="mt-3">
-                    {isDropdown ? <ChevronUp /> : <ChevronDown/>}
+                    {isDropdown ? <ChevronUp /> : <ChevronDown />}
                   </button>
                 ) : null}
               </div>
@@ -117,40 +98,14 @@ export default function Sidebar() {
             ) : null}
           </div>
         </div>
-        <div className="mt-4">
-          <h1
-            className={
-              role === "MANAGER" ? "text-gray-400 font-bold" : "hidden"
-            }
-          >
-            Report
-          </h1>
-          <div className="flex flex-col space-y-2">
-            {role === "MANAGER"
-              ? reportList.map((list: any, index: number) => (
-                  <Link
-                    key={index}
-                    href={list.path}
-                    className={
-                      pathname === list.path
-                        ? "mt-3 bg-primary p-2 rounded-md w-full"
-                        : "mt-3 bg-primary bg-opacity-30 backdrop-blur-lg p-2 rounded-md w-full"
-                    }
-                  >
-                    {list.label}
-                  </Link>
-                ))
-              : null}
-          </div>
 
-          <div className="mt-4">
-            <button
-              onClick={handleSignOut}
-              className="bg-red-500 text-white font-bold px-2 py-2 rounded-md  w-full"
-            >
-              Sign Out
-            </button>
-          </div>
+        <div className="mt-4">
+          <button
+            onClick={handleSignOut}
+            className="bg-red-500 text-white font-bold px-2 py-2 rounded-md  w-full"
+          >
+            Sign Out
+          </button>
         </div>
       </div>
     </div>

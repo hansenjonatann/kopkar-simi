@@ -9,18 +9,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useRole } from "@/hooks/use-role";
+import { exportSalesReportToPDF } from "@/lib/features/export-sales-report-to-pdf";
 import axios from "axios";
+import { File, FileSpreadsheet } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
 function SalesContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { role } = useRole();
   const page = Number(searchParams.get("page")) || 1;
   const [sales, setSales] = useState([]);
-  const [selectedDate , setSelectedDate] = useState('')
-  const [filteredSales , setFilteredSales] = useState([])
-  const [summarize , setSummarize] = useState(0)
+  const [selectedDate, setSelectedDate] = useState("");
+  const [filteredSales, setFilteredSales] = useState([]);
+  const [summarize, setSummarize] = useState(0);
 
   // Fetch Sales Data
   const fetchSales = async () => {
@@ -41,33 +45,33 @@ function SalesContent() {
     router.push(`?${params.toString()}`);
   };
 
-
   const fetchSalesByDate = async (date: string) => {
     try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sales/filter/date?date=${date}`)
-      setFilteredSales(res.data.data)
-      setSummarize(res.data.total._sum.total)
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/sales/filter/date?date=${date}`
+      );
+      setFilteredSales(res.data.data);
+      setSummarize(res.data.total._sum.total);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
-
+  const dataToShow = selectedDate ? filteredSales : sales;
 
   useEffect(() => {
-    fetchSales();  
-    fetchSalesByDate(selectedDate)
-  }, [page , selectedDate]);
+    fetchSales();
+    fetchSalesByDate(selectedDate);
+  }, [page, selectedDate]);
 
   return (
     <>
       <h1 className="text-xl font-bold">Sale</h1>
       <div className="mt-4 flex items-center">
-        <div className="flex flex-col">
-          <p>Filter by Date </p>
+        <div className="flex gap-4 items-center">
           <select
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="bg-primary text-white  px-3 mt-4 rounded-md "
+            className="bg-primary text-white  px-3 py-2  rounded-md "
           >
             <option value="">Select date of sale</option>
             {sales.map((sale: any, index: number) => (
@@ -76,6 +80,25 @@ function SalesContent() {
               </option>
             ))}
           </select>
+          {role == "MANAGER" && (
+            <>
+              <Button className="bg-green-600 hover:bg-green-800 text-white p-2 font-bold rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <FileSpreadsheet />
+                  <p>Export Excel</p>
+                </div>
+              </Button>
+              <Button
+                onClick={() => exportSalesReportToPDF(dataToShow)}
+                className="bg-red-950 text-white p-2 font-bold rounded-lg"
+              >
+                <div className="flex items-center space-x-2">
+                  <File />
+                  <p>Export PDF</p>
+                </div>
+              </Button>
+            </>
+          )}
         </div>
       </div>
       <div className="mt-8">
