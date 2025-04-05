@@ -83,7 +83,7 @@ model SaleItem {
   unitPrice Int    @default(0)
 
   Sale    Sale    @relation(fields: [saleId], references: [id])
-  Product Product @relation(fields: [productId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
 }
 
 model InventoryLog {

@@ -12,7 +12,7 @@ import {
 import { useRole } from "@/hooks/use-role";
 import { exportSalesReportToPDF } from "@/lib/features/export-sales-report-to-pdf";
 import axios from "axios";
-import { File, FileSpreadsheet } from "lucide-react";
+import { Eye, File, FileSpreadsheet } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
@@ -21,6 +21,7 @@ function SalesContent() {
   const router = useRouter();
   const { role } = useRole();
   const page = Number(searchParams.get("page")) || 1;
+  const [selectedSale, setSelectedSale] = useState<any>(null);
   const [sales, setSales] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [filteredSales, setFilteredSales] = useState([]);
@@ -61,7 +62,9 @@ function SalesContent() {
 
   useEffect(() => {
     fetchSales();
-    fetchSalesByDate(selectedDate);
+    if (selectedDate) {
+      fetchSalesByDate(selectedDate);
+    }
   }, [page, selectedDate]);
 
   return (
@@ -110,67 +113,45 @@ function SalesContent() {
               <TableHead>Sub Total</TableHead>
               <TableHead>Discount</TableHead>
               <TableHead>Total</TableHead>
-              {/* <TableHead>Actions</TableHead> */}
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {selectedDate
-              ? filteredSales.map(
-                  (
-                    sale: {
-                      date: string;
-                      discount: number;
-                      subtotal: number;
-                      total: number;
-                    },
-                    index: number
-                  ) => (
-                    <TableRow key={index}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>{sale.date}</TableCell>
-                      <TableCell>
-                        {sale.subtotal.toLocaleString("id")}
-                      </TableCell>
-                      <TableCell>
-                        {sale.discount.toLocaleString("id")}
-                      </TableCell>
-                      <TableCell>{sale.total.toLocaleString("id")}</TableCell>
-                      {/* <TableCell>
-                    <Button variant="destructive">
-                    <TrashIcon />
-                    </Button>
-                    </TableCell> */}
-                    </TableRow>
-                  )
-                )
-              : sales.map(
-                  (
-                    sale: {
-                      date: string;
-                      discount: number;
-                      subtotal: number;
-                      total: number;
-                    },
-                    index: number
-                  ) => (
-                    <TableRow key={index}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>{sale.date}</TableCell>
-                      <TableCell>
-                        {sale.subtotal.toLocaleString("id")}
-                      </TableCell>
-                      <TableCell>
-                        {sale.discount.toLocaleString("id")}
-                      </TableCell>
-                      <TableCell>{sale.total.toLocaleString("id")}</TableCell>
-                      {/* <TableCell>
-                    <Button variant="destructive">
-                      <TrashIcon />
-                    </Button>
-                  </TableCell> */}
-                    </TableRow>
-                  )
-                )}
+              ? filteredSales.map((sale: any, index: number) => (
+                  <TableRow key={index}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>{sale.date}</TableCell>
+                    <TableCell>{sale.subtotal.toLocaleString("id")}</TableCell>
+                    <TableCell>{sale.discount.toLocaleString("id")}</TableCell>
+                    <TableCell>{sale.total.toLocaleString("id")}</TableCell>
+                    <TableCell>
+                      <Button
+                        onClick={() => setSelectedSale(sale)}
+                        className="bg-sky-600 py-2 px-4 rounded-lg"
+                      >
+                        <Eye />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              : sales.map((sale: any, index: number) => (
+                  <TableRow key={index}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>{sale.date}</TableCell>
+                    <TableCell>{sale.subtotal.toLocaleString("id")}</TableCell>
+                    <TableCell>{sale.discount.toLocaleString("id")}</TableCell>
+                    <TableCell>{sale.total.toLocaleString("id")}</TableCell>
+                    <TableCell>
+                      <Button
+                        onClick={() => setSelectedSale(sale)}
+                        className="bg-sky-600 py-2 px-4 rounded-lg"
+                      >
+                        <Eye />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
           </TableBody>
           {summarize ? (
             <TableFooter>
@@ -206,6 +187,47 @@ function SalesContent() {
           </Button>
         </div>
       </div>
+
+      {selectedSale && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 w-[90%] max-w-3xl">
+            <h2 className="text-xl font-bold mb-4">
+              Sale Detail : {selectedSale.date}
+            </h2>
+
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>#</TableHead>
+                  <TableHead>Product Name</TableHead>
+                  <TableHead>Qty</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {selectedSale.SaleItems?.map((item: any, idx: number) => (
+                  <TableRow key={idx}>
+                    <TableCell>{idx + 1}</TableCell>
+                    <TableCell>{item.product?.name}</TableCell>
+                    <TableCell>{item.quantity}</TableCell>
+                    <TableCell>{item.unitPrice.toLocaleString("id")}</TableCell>
+                    <TableCell>
+                      {(item.unitPrice * item.quantity).toLocaleString("id")}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+
+            <div className="mt-6 flex justify-end">
+              <Button variant="outline" onClick={() => setSelectedSale(null)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
