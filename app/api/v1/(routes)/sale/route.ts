@@ -60,6 +60,7 @@ export const POST = async (req: NextRequest) => {
       .replaceAll("/", "-");
     const newsale = await db.sale.create({
       data: {
+        customerId: body.customerId,
         date: generateDate,
         discount: body.discount,
         total: body.discount ? body.subtotal - body.discount : body.subtotal,
