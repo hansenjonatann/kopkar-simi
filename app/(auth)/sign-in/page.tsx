@@ -14,7 +14,7 @@ export default function SignInPage() {
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const { role } = useRole();
-  const session = useSession()
+  const session = useSession();
 
   const router = useRouter();
   const handleLogin = async (e: any) => {
@@ -27,30 +27,28 @@ export default function SignInPage() {
         redirect: false,
       });
 
-
-
-
       if (!res || res.error) {
-        setLoading(false)
+        setLoading(false);
         // Login gagal
         toast.error("Invalid Credentials!");
       }
 
-      if(res) {
-        setLoading(false)
-        if (role === "ADMIN" || role === 'MANAGER') {
-          setLoading(false);
+      if (res) {
+        setLoading(false);
+        if (
+          role === "ADMIN" ||
+          role === "MANAGER" ||
+          role == "ADMIN_LOANANDSAVINGS"
+        ) {
           localStorage.setItem("token", String(session.data?.user.id));
           router.push("/dashboard");
         } else if (role === "CASHIER") {
-          setLoading(false);
           localStorage.setItem("token", String(session.data?.user.id));
 
           router.push("/cashier/transaction");
         }
       }
       // Login berhasil
-      
     } catch (error) {
       setLoading(false);
       console.log(error);

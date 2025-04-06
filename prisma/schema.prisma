@@ -51,8 +51,37 @@ model Category {
   products Product[]
 }
 
+model Customer {
+  id String @id @default(uuid())
+  customerCode String
+  name String
+  nik String
+  address String
+  phone String
+  department String
+  transactionLimit Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sales Sale[]
+  loans Loan[]
+  savings PrincipalSavings[]
+}
+
+model PrincipalSavings {
+  id String @id @default(uuid())
+  customerId String
+  customer Customer @relation(fields: [customerId] , references: [id])
+  saveDate String
+  nominalSavings Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+}
 model Sale {
   id          String        @id @default(uuid())
+  customerId String
+  customer Customer @relation(fields: [customerId] , references: [id])
   date        String
   discount    Int?
   subtotal    Int
@@ -75,6 +104,27 @@ model Transaction {
   Sale Sale @relation(fields: [saleId], references: [id])
 }
 
+
+model Loan {
+  id String @id @default(uuid())
+  customerId String
+  customer Customer @relation(fields: [customerId] , references: [id])
+  loanDate String
+  dueDate String
+  typeofLoan TypeOfLoan
+  interestRate Int
+  interestPerMonth Int
+  totalInterest Int
+  loanAmount Int
+  installment Int
+  principalInstallment Int
+  totalLoan Int
+  duration Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+
+}
 model SaleItem {
   id        String @id @default(uuid())
   saleId    String
@@ -114,4 +164,10 @@ enum Role {
   ADMIN
   CASHIER
   MANAGER
+  ADMIN_LOANANDSAVINGS
+}
+
+enum TypeOfLoan {
+  RF
+  SPT_AND_MANAGER
 }

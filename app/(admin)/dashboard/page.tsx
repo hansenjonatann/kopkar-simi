@@ -3,11 +3,13 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import DashboardCard from "./_components/dashboard-card";
+import { useRole } from "@/hooks/use-role";
 
 export default function Dashboardpage() {
   const [totalSalesToday, setTotalSalesToday] = useState(0);
   const [totalSalesPerMonth, setTotalSalesPerMonth] = useState(0);
-  const date = new Date().toLocaleDateString('id').replaceAll("/", "-");
+  const { role } = useRole();
+  const date = new Date().toLocaleDateString("id").replaceAll("/", "-");
   const month = new Date().getMonth() + 1;
   const year = new Date().getFullYear();
 
@@ -45,27 +47,31 @@ export default function Dashboardpage() {
   useEffect(() => {
     const interval = setInterval(() => {
       fetchSalesToday();
-    } , 3000)
+    }, 3000);
     fetchSalesMonth();
 
-    return () => clearInterval(interval)
-    
-  }, [date , ]);
+    return () => clearInterval(interval);
+  }, [date]);
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <DashboardCard
-          title="Total Penjualan Hari ini"
-          content={`Rp ${totalSalesToday == 0 ? "-" : totalSalesToday > 0 ? totalSalesToday.toLocaleString("id") : 0} `}
-        />
-        <DashboardCard
-          title={`Total Penjualan bulan : ${monthName}`}
-          content={`Rp ${totalSalesPerMonth == 0 ? "-" : totalSalesPerMonth?.toLocaleString("id")}`}
-        />
-      </div>
-      <div className="mt-4">
-        <div className="bg-white bg-opacity-70 w-full h-[500px] rounded-lg"></div>
-      </div>
+      {role == "ADMIN" ||
+        (role == "MANAGER" && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <DashboardCard
+                title="Total Penjualan Hari ini"
+                content={`Rp ${totalSalesToday == 0 ? "-" : totalSalesToday > 0 ? totalSalesToday.toLocaleString("id") : 0} `}
+              />
+              <DashboardCard
+                title={`Total Penjualan bulan : ${monthName}`}
+                content={`Rp ${totalSalesPerMonth == 0 ? "-" : totalSalesPerMonth?.toLocaleString("id")}`}
+              />
+            </div>
+            <div className="mt-4">
+              <div className="bg-white bg-opacity-70 w-full h-[500px] rounded-lg"></div>
+            </div>
+          </>
+        ))}
     </>
   );
 }
