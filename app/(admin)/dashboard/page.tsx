@@ -4,14 +4,41 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import DashboardCard from "./_components/dashboard-card";
 import { useRole } from "@/hooks/use-role";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import Link from "next/link";
+import { formatDate } from "@/lib/features/format-date";
 
 export default function Dashboardpage() {
   const [totalSalesToday, setTotalSalesToday] = useState(0);
   const [totalSalesPerMonth, setTotalSalesPerMonth] = useState(0);
+  const [totalLoans, setTotalLoans] = useState(0);
+  const [loans, setLoans] = useState([]);
+  const [customers, setCustomers] = useState([]);
   const { role } = useRole();
   const date = new Date().toLocaleDateString("id").replaceAll("/", "-");
   const month = new Date().getMonth() + 1;
   const year = new Date().getFullYear();
+
+  const fetchCustomers = async () => {
+    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}customer`);
+    setCustomers(res.data.data);
+  };
+
+  const fetchLoans = async () => {
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}loan-and-savings/loan`
+    );
+    setLoans(res.data.data);
+    setTotalLoans(res.data.total._sum.totalLoan);
+  };
 
   const months = [
     "Januari",
@@ -47,8 +74,10 @@ export default function Dashboardpage() {
   useEffect(() => {
     const interval = setInterval(() => {
       fetchSalesToday();
+      fetchSalesMonth();
+      fetchCustomers();
+      fetchLoans();
     }, 3000);
-    fetchSalesMonth();
 
     return () => clearInterval(interval);
   }, [date]);
@@ -72,6 +101,87 @@ export default function Dashboardpage() {
             </div>
           </>
         ))}
+
+      {role == "ADMIN_LOANANDSAVINGS" && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <DashboardCard
+              title="Total Customer"
+              content={`${customers.length} Person`}
+            />
+            <DashboardCard
+              title="Total Loan"
+              content={`${loans.length} Transaction`}
+            />
+          </div>
+          <div className="mx-3 mt-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col">
+                <Link href={"/dashboard/customer"} className="font-bold">
+                  Customer
+                </Link>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Customer Code</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Principal Savings</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {customers.map((customer: any, index: number) => (
+                      <TableRow key={index}>
+                        <TableCell>{customer.customerCode}</TableCell>
+                        <TableCell>{customer.name}</TableCell>
+                        <TableCell>
+                          {customer.savings[0].nominalSavings.toLocaleString(
+                            "id"
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="flex flex-col">
+                <Link href={"/dashboard/loan"} className="font-bold">
+                  Loan
+                </Link>
+                <Table className="max-h-[400px] overflow-y-scroll">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Loan Date</TableHead>
+                      <TableHead>Due Date</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Loan Amount</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {loans.map((loan: any, index: number) => (
+                      <TableRow key={index}>
+                        <TableCell>{formatDate(loan.loanDate)}</TableCell>
+                        <TableCell>{formatDate(loan.dueDate)}</TableCell>
+                        <TableCell>{loan.customer.name}</TableCell>
+                        <TableCell>
+                          {loan.loanAmount.toLocaleString("id")}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                  <TableFooter>
+                    <TableRow>
+                      <TableCell>Total </TableCell>
+                      <TableCell></TableCell>
+                      <TableCell></TableCell>
+                      <TableCell>{totalLoans.toLocaleString("id")}</TableCell>
+                    </TableRow>
+                  </TableFooter>
+                </Table>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

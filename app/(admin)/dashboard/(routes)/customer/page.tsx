@@ -58,7 +58,7 @@ export default function DashboardCustomerPage() {
                   {customer.transactionLimit.toLocaleString("id")}
                 </TableCell>
                 <TableCell>
-                  {customer.savings[idx].nominalSavings.toLocaleString("id")}
+                  {customer.savings[0].nominalSavings.toLocaleString("id")}
                 </TableCell>
               </TableRow>
             ))}

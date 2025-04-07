@@ -11,10 +11,17 @@ export const GET = async () => {
         customer: true,
       },
     });
+
+    const totalLoans = await db.loan.aggregate({
+      _sum: {
+        totalLoan: true,
+      },
+    });
     return NextResponse.json({
       status: "success",
       message: "List of Loan",
       data: loans,
+      total: totalLoans,
     });
   } catch (error) {
     return NextResponse.json({

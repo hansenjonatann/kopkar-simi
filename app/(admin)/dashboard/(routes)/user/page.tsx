@@ -49,7 +49,7 @@ export default function DashboardUserPage() {
               <TableHead>#</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Username</TableHead>
-              <TableHead>Role</TableHead>
+              <TableHead className="text-center">Role</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -68,7 +68,11 @@ export default function DashboardUserPage() {
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>{user.name}</TableCell>
                   <TableCell>{user.username}</TableCell>
-                  <TableCell>{user.role}</TableCell>
+                  <TableCell className="flex justify-center">
+                    <div className="bg-sky-600 w-[200px] text-center text-white p-2 rounded-lg">
+                      {user.role}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <Button
                       variant={"destructive"}

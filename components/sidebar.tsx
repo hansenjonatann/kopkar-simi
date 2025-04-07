@@ -70,7 +70,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className=" m-4 w-48 h-[700px] rounded-lg bg-primary text-secondary">
+    <div className="hidden md:flex m-4 w-48 h-[700px] rounded-lg bg-primary text-secondary">
       <div className="m-3">
         <h1 className="text-center font-bold">{name}</h1>
         {role == "ADMIN" && (
@@ -81,7 +81,7 @@ export default function Sidebar() {
                 className={
                   pathname == "/dashboard"
                     ? "bg-secondary w-full text-primary font-bold p-2 rounded-lg "
-                    : " w-full text-primary font-bold p-2 rounded-lg "
+                    : " w-full text-secondary font-bold  "
                 }
               >
                 Dashboard
