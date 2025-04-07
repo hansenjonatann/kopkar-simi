@@ -8,7 +8,11 @@ export const GET = async () => {
   try {
     const customers = await db.customer.findMany({
       include: {
-        savings: true,
+        savings: {
+          select: {
+            nominalSavings: true,
+          },
+        },
       },
     });
     return NextResponse.json({
