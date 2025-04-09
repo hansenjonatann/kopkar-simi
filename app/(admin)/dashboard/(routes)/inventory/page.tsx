@@ -5,6 +5,14 @@ import axios from "axios";
 import { File, FileSpreadsheet } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function DashboardInventory() {
   const [page, setPage] = useState(0);
@@ -64,61 +72,38 @@ export default function DashboardInventory() {
         )}
       </div>
       <div className="mt-8">
-        <table className="table-auto w-full ">
-          <thead>
-            <tr>
-              <th className="border-t border-r border-l border-gray-500">#</th>
-              <th className="border-t border-r border-l border-gray-500">
-                Date
-              </th>
-              <th className="border-t border-r border-l border-gray-500">
-                Product
-              </th>
-              <th className="border-t border-r border-l border-gray-500">
-                Quantity
-              </th>
-              <th className="border-t border-r border-l border-gray-500">
-                Change Type
-              </th>
-              {/* <th className="border-t border-r border-l border-gray-500">Action</th> */}
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>#</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Product</TableHead>
+              <TableHead>Quantity</TableHead>
+              <TableHead>Change Type</TableHead>
+              {/* <TableHead>Action</TableH> */}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {listinventory.map((inv: any, index: number) => (
-              <tr key={index} className="mt-3">
-                <td className="border p-2 border-gray-500 text-center">
-                  {page > 1 ? index + 1 + 5 : index + 1}
-                </td>
+              <TableRow key={index}>
+                <TableCell>{page > 1 ? index + 1 + 5 : index + 1}</TableCell>
 
-                <td className="border border-gray-500 text-center my-3">
-                  {inv.date}
-                </td>
-                <td className="border border-gray-500 text-center my-3">
-                  {inv.Product.name}
-                </td>
-                <td className="border border-gray-500 text-center my-3">
-                  {inv.quantity}
-                </td>
-                <td className="border border-gray-500 text-center my-3">
-                  <div
-                    className={
-                      inv.changeType == "PURCHASE"
-                        ? "bg-blue-600  mx-auto p-2 my-2 w-52 text-white rounded-md"
-                        : "bg-green-600 p-2 mx-auto my-2 w-52 text-white rounded-md"
-                    }
-                  >
-                    {inv.changeType}
-                  </div>
-                </td>
-                {/* <td className="border border-gray-500 text-center my-3">
-                            <button onClick={() => handleDelete(inv.id)} className="bg-red-500 text-white p-2 m-2 rounded-md">
-                              Delete
-                            </button>
-                          </td> */}
-              </tr>
+                <TableCell>{inv.date}</TableCell>
+                <TableCell>{inv.Product.name}</TableCell>
+                <TableCell>{inv.quantity}</TableCell>
+                <TableCell
+                  className={
+                    inv.changeType == "PURCHASE"
+                      ? "text-blue-600"
+                      : "text-green-600"
+                  }
+                >
+                  {inv.changeType}
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
         <div className="flex gap-4 items-center mt-4">
           <button
             onClick={handlePrevious}

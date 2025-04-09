@@ -109,6 +109,7 @@ function SalesContent() {
           <TableHeader>
             <TableRow>
               <TableHead>#</TableHead>
+              <TableHead>Customer </TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Sub Total</TableHead>
               <TableHead>Discount</TableHead>
@@ -121,6 +122,7 @@ function SalesContent() {
               ? filteredSales.map((sale: any, index: number) => (
                   <TableRow key={index}>
                     <TableCell>{index + 1}</TableCell>
+                    <TableCell>{sale.customer.name}</TableCell>
                     <TableCell>{sale.date}</TableCell>
                     <TableCell>{sale.subtotal.toLocaleString("id")}</TableCell>
                     <TableCell>{sale.discount.toLocaleString("id")}</TableCell>
@@ -138,6 +140,8 @@ function SalesContent() {
               : sales.map((sale: any, index: number) => (
                   <TableRow key={index}>
                     <TableCell>{index + 1}</TableCell>
+                    <TableCell>{sale.customer.name}</TableCell>
+
                     <TableCell>{sale.date}</TableCell>
                     <TableCell>{sale.subtotal.toLocaleString("id")}</TableCell>
                     <TableCell>{sale.discount.toLocaleString("id")}</TableCell>

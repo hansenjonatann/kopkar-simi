@@ -6,7 +6,7 @@ import axios from "axios";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -17,11 +17,18 @@ export default function CashierTransactionPage() {
   const dispatch = useDispatch();
   const router = useRouter();
   const items = useSelector((state: RootState) => state.items.items);
+  const [customers, setCustomers] = useState([]);
+  const [customerId, setCustomerId] = useState("");
 
   const subtotal = items.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
   );
+
+  const fetchCustomers = async () => {
+    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}customer`);
+    setCustomers(res.data.data);
+  };
 
   const total = subtotal - discount;
 
@@ -35,6 +42,7 @@ export default function CashierTransactionPage() {
           productId: item.id,
         })),
         discount,
+        customerId,
         subtotal,
         total,
       });
@@ -49,13 +57,12 @@ export default function CashierTransactionPage() {
   };
 
   const handleSignOut = async () => {
-    await signOut({redirect: false , callbackUrl: '/sign-in'}).then(() => {
+    await signOut({ redirect: false, callbackUrl: "/sign-in" }).then(() => {
       localStorage.removeItem("token");
-      toast.success('Logout success!')
-      router.push('/sign-in')
-
-    })
-  }
+      toast.success("Logout success!");
+      router.push("/sign-in");
+    });
+  };
   const fetchProducts = async (code: number) => {
     try {
       const res = await axios.get(
@@ -86,6 +93,9 @@ export default function CashierTransactionPage() {
     { id: 3, label: "Sales Return", path: "/cashier/salesreturn" },
   ];
 
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
   return (
     <>
       <div className="m-4">
@@ -118,6 +128,23 @@ export default function CashierTransactionPage() {
                   }}
                 />
               </div>
+              <div className="my-4 flex gap-x-2">
+                <label htmlFor="code" className="w-40">
+                  Customer
+                </label>
+                <span>:</span>
+                <select
+                  onChange={(e) => setCustomerId(e.target.value)}
+                  className="px-4 border border-black rounded-md"
+                >
+                  <option value="">Select customer</option>
+                  {customers.map((cust: any, index: number) => (
+                    <option key={index} value={cust.id}>
+                      {cust.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div className="bg-green-600 flex items-center justify-center w-full">
               <h1 className="text-4xl  text-secondary font-semibold">
@@ -137,9 +164,7 @@ export default function CashierTransactionPage() {
                     PRODUCT NAME
                   </th>
                   <th className="border border-white text-center">QTY</th>
-                  <th className="border border-white text-center">
-                    @ PRICE
-                  </th>
+                  <th className="border border-white text-center">@ PRICE</th>
                   <th className="border border-white text-center">TOTAL</th>
                 </tr>
               </thead>

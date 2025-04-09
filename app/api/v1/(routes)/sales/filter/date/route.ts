@@ -16,6 +16,7 @@ export const GET = async (req: NextRequest) => {
           product: true,
         },
       },
+      customer: true,
     },
   });
 

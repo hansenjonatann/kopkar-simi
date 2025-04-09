@@ -4,10 +4,21 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { TrashIcon } from "lucide-react";
 
 export default function DashboardCategoryPage() {
   const [page, setPage] = useState(0);
   const [isModal, setIsModal] = useState(false);
+
   const [categories, setCategories] = useState([]);
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -79,47 +90,44 @@ export default function DashboardCategoryPage() {
             </button>
           </div>
           <div className="mt-8">
-            <table className="table-default">
-              <thead>
-                <tr>
-                  <th className="border-t border-r border-l border-gray-500">
-                    #
-                  </th>
-                  <th className="border-t border-r border-l border-gray-500">
-                    Name
-                  </th>
-                  <th className="border-t border-r border-l border-gray-500">
-                    Slug
-                  </th>
-                  <th className="border-t border-r border-l border-gray-500">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {categories.map((cat: any, index: number) => (
-                  <tr key={index} className="mt-3">
-                    <td className="border p-2 border-gray-500 text-center">
-                      {page > 1 ? index + 1 + 5 : index + 1}
-                    </td>
-                    <td className="border border-gray-500 text-center">
-                      {cat.name}
-                    </td>
-                    <td className="border border-gray-500 text-center">
-                      {cat.slug}
-                    </td>
-                    <td className="border border-gray-500 text-center">
-                      <button
-                        onClick={() => handleDelete(cat.id)}
-                        className="bg-red-500 text-white p-2 m-2 rounded-md"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>#</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Slug</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {categories.map(
+                  (
+                    cat: {
+                      id: string;
+                      name: string;
+                      slug: string;
+                    },
+                    index: number
+                  ) => (
+                    <TableRow key={index} className="mt-3">
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{cat.name}</TableCell>
+                      <TableCell>{cat.slug}</TableCell>
+
+                      <TableCell>
+                        <Button
+                          variant={"destructive"}
+                          onClick={() => handleDelete(cat.id)}
+                          className=" text-white text-center font-bold px-4 rounded-md "
+                        >
+                          <TrashIcon />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  )
+                )}
+              </TableBody>
+            </Table>
             <div className="flex gap-4 items-center mt-4">
               <button
                 onClick={handlePrevious}

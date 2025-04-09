@@ -17,6 +17,7 @@ export const GET = async (req: NextRequest) => {
         SaleItems: {
           include: { product: true },
         },
+        customer: true,
       },
       take: limit,
       skip: offset,

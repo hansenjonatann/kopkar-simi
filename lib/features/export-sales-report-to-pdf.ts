@@ -14,10 +14,11 @@ export function exportSalesReportToPDF(data: any[]) {
   data.forEach((sale, saleIndex) => {
     // 🔹 Tabel utama transaksi
     autoTable(doc, {
-      head: [["#", "Date", "Subtotal", "Discount", "Total"]],
+      head: [["#", "Customer", "Date", "Subtotal", "Discount", "Total"]],
       body: [
         [
           saleIndex + 1,
+          sale.customer.name,
           sale.date,
           sale.subtotal.toLocaleString("id"),
           sale.discount.toLocaleString("id"),

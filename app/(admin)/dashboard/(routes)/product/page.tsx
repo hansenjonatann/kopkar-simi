@@ -5,6 +5,15 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { TrashIcon } from "lucide-react";
 
 export default function DashboardProductPage() {
   const [page, setPage] = useState(0);
@@ -96,77 +105,47 @@ export default function DashboardProductPage() {
             </button>
           </div>
           <div className="mt-8">
-            <table className="table-auto w-full ">
-              <thead>
-                <tr>
-                  <th className="border-t border-r border-l border-gray-500">
-                    #
-                  </th>
-                  <th className="border-t border-r border-l border-gray-500">
-                    Barcode
-                  </th>
-                  <th className="border-t border-r border-l border-gray-500">
-                    Code
-                  </th>
-                  <th className="border-t border-r border-l border-gray-500">
-                    Name
-                  </th>
-                  <th className="border-t border-r border-l border-gray-500">
-                    Category
-                  </th>
-                  <th className="border-t border-r border-l border-gray-500">
-                    Cost
-                  </th>
-                  <th className="border-t border-r border-l border-gray-500">
-                    Price
-                  </th>
-                  <th className="border-t border-r border-l border-gray-500">
-                    Stock
-                  </th>
-                  <th className="border-t border-r border-l border-gray-500">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>#</TableHead>
+                  <TableHead>Barcode</TableHead>
+                  <TableHead>Code</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Cost</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Stock</TableHead>
+                  <TableHead>Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {products.map((pro: any, index: number) => (
-                  <tr key={index} className="mt-3">
-                    <td className="border p-2 border-gray-500 text-center">
+                  <TableRow key={index}>
+                    <TableCell>
                       {page > 1 ? index + 1 + 5 : index + 1}
-                    </td>
-                    <td className="border border-gray-500 text-center">
+                    </TableCell>
+                    <TableCell>
                       <CustomBarcode value={pro.code} />
-                    </td>
-                    <td className="border border-gray-500 text-center my-3">
-                      {pro.code}
-                    </td>
-                    <td className="border border-gray-500 text-center my-3">
-                      {pro.name}
-                    </td>
-                    <td className="border border-gray-500 text-center my-3">
-                      {pro.category.name}
-                    </td>
-                    <td className="border border-gray-500 text-center my-3">
-                      {pro.cost.toLocaleString("id")}
-                    </td>
-                    <td className="border border-gray-500 text-center my-3">
-                      {pro.price.toLocaleString("id")}
-                    </td>
-                    <td className="border border-gray-500 text-center my-3">
-                      {pro.stock}
-                    </td>
-                    <td className="border border-gray-500 text-center my-3">
+                    </TableCell>
+                    <TableCell>{pro.code}</TableCell>
+                    <TableCell>{pro.name}</TableCell>
+                    <TableCell>{pro.category.name}</TableCell>
+                    <TableCell>{pro.cost.toLocaleString("id")}</TableCell>
+                    <TableCell>{pro.price.toLocaleString("id")}</TableCell>
+                    <TableCell>{pro.stock}</TableCell>
+                    <TableCell>
                       <button
                         onClick={() => handleDelete(pro.id)}
                         className="bg-red-500 text-white p-2 m-2 rounded-md"
                       >
-                        Delete
+                        <TrashIcon />
                       </button>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
             <div className="flex gap-4 items-center mt-4">
               <button
                 onClick={handlePrevious}
