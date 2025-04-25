@@ -16,6 +16,7 @@ export default function SignInPage() {
   const { role } = useRole();
   const session = useSession();
 
+
   const router = useRouter();
   const handleLogin = async (e: any) => {
     e.preventDefault();
@@ -35,6 +36,8 @@ export default function SignInPage() {
 
       if (res) {
         setLoading(false);
+        console.log(username , password)
+
         if (
           role === "ADMIN" ||
           role === "MANAGER" ||

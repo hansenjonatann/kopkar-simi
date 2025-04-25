@@ -14,8 +14,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { TrashIcon } from "lucide-react";
+import { useRole } from "@/hooks/use-role";
 
 export default function DashboardProductPage() {
+  const {role} = useRole()
   const [page, setPage] = useState(0);
   const [isModal, setIsModal] = useState(false);
   const [products, setProducts] = useState([]);
@@ -26,15 +28,26 @@ export default function DashboardProductPage() {
   const [cost, setCost] = useState(0);
   const [categories, setCategories] = useState([]);
   const [categoryId, setCategoryId] = useState("");
+  const [fetchloading , setFetchLoading] = useState(false)
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  
 
   const fetchProducts = async () => {
+   try {
+    setFetchLoading(true)
     const res = await axios.get(
       `${process.env.NEXT_PUBLIC_API_URL}product?page=${page}`
     );
-    setProducts(res.data.data.data);
+    if(res) {
+      setFetchLoading(false)
+      setProducts(res.data.data.data);
     setPage(res.data.data.pagination.currentpage);
+    }
+   } catch (error) {
+    setFetchLoading(false)
+    console.log(error)
+   }
   };
 
   const fetchCategories = async () => {
@@ -96,31 +109,37 @@ export default function DashboardProductPage() {
       <div className={isModal ? "hidden" : "block"}>
         <h1 className="font-bold">{"Dashbord / Product"}</h1>
         <div className="mt-4">
-          <div className="flex">
+          {role == 'ADMIN' && <div className="flex">
             <button
               onClick={handleModalOpen}
               className="bg-blue-600 text-white p-2 rounded-md"
             >
               Add a new Product
             </button>
-          </div>
+          </div>}
           <div className="mt-8">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>#</TableHead>
                   <TableHead>Barcode</TableHead>
-                  <TableHead>Code</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Cost</TableHead>
                   <TableHead>Price</TableHead>
                   <TableHead>Stock</TableHead>
-                  <TableHead>Action</TableHead>
+           {role == 'ADMIN' &&        <TableHead>Action</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {products.map((pro: any, index: number) => (
+                {fetchloading ? <TableRow>
+                  <TableCell></TableCell>
+                  <TableCell></TableCell>
+                  <TableCell></TableCell>
+                  <TableCell></TableCell>
+                  <TableCell>Loading products data ...</TableCell>
+                  <TableCell></TableCell>
+                </TableRow> :products.map((pro: any, index: number) => (
                   <TableRow key={index}>
                     <TableCell>
                       {page > 1 ? index + 1 + 5 : index + 1}
@@ -128,20 +147,20 @@ export default function DashboardProductPage() {
                     <TableCell>
                       <CustomBarcode value={pro.code} />
                     </TableCell>
-                    <TableCell>{pro.code}</TableCell>
+                   
                     <TableCell>{pro.name}</TableCell>
                     <TableCell>{pro.category.name}</TableCell>
                     <TableCell>{pro.cost.toLocaleString("id")}</TableCell>
                     <TableCell>{pro.price.toLocaleString("id")}</TableCell>
                     <TableCell>{pro.stock}</TableCell>
-                    <TableCell>
+                   {role == 'ADMIN' &&  <TableCell>
                       <button
                         onClick={() => handleDelete(pro.id)}
                         className="bg-red-500 text-white p-2 m-2 rounded-md"
                       >
                         <TrashIcon />
                       </button>
-                    </TableCell>
+                    </TableCell>}
                   </TableRow>
                 ))}
               </TableBody>

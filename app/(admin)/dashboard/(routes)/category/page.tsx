@@ -14,10 +14,12 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { TrashIcon } from "lucide-react";
+import { useRole } from "@/hooks/use-role";
 
 export default function DashboardCategoryPage() {
   const [page, setPage] = useState(0);
   const [isModal, setIsModal] = useState(false);
+  const {role} = useRole()
 
   const [categories, setCategories] = useState([]);
   const [name, setName] = useState("");
@@ -79,16 +81,16 @@ export default function DashboardCategoryPage() {
   return (
     <>
       <div className={isModal ? "hidden" : "bolock"}>
-        <h1 className="font-bold">{"Dashbord / Category"}</h1>
+        <h1 className="font-bold">{"Dashboard / Category"}</h1>
         <div className="mt-4">
-          <div className="flex">
+        {role == 'ADMIN' &&   <div className="flex">
             <button
               onClick={handleModalOpen}
               className="bg-blue-600 text-white p-2 rounded-md"
             >
               Add a new Category
             </button>
-          </div>
+          </div>}
           <div className="mt-8">
             <Table>
               <TableHeader>
@@ -96,7 +98,7 @@ export default function DashboardCategoryPage() {
                   <TableHead>#</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Slug</TableHead>
-                  <TableHead>Actions</TableHead>
+                 {role == 'ADMIN' &&  <TableHead>Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -114,7 +116,7 @@ export default function DashboardCategoryPage() {
                       <TableCell>{cat.name}</TableCell>
                       <TableCell>{cat.slug}</TableCell>
 
-                      <TableCell>
+                     {role === 'ADMIN' &&  <TableCell>
                         <Button
                           variant={"destructive"}
                           onClick={() => handleDelete(cat.id)}
@@ -122,7 +124,7 @@ export default function DashboardCategoryPage() {
                         >
                           <TrashIcon />
                         </Button>
-                      </TableCell>
+                      </TableCell>}
                     </TableRow>
                   )
                 )}

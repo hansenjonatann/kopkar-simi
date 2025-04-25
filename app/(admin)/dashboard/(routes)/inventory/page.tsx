@@ -17,6 +17,7 @@ import {
 export default function DashboardInventory() {
   const [page, setPage] = useState(0);
   const [listinventory, setListInventory] = useState([]);
+  const [loading , setLoading] = useState(false)
   const { role } = useRole();
 
   // const handleDelete =  async (params: string) => {
@@ -26,11 +27,15 @@ export default function DashboardInventory() {
   //   }
 
   const fetchInventory = async () => {
+    setLoading(true)
     const res = await axios.get(
       `${process.env.NEXT_PUBLIC_API_URL}inventory?page=${page}`
     );
+   if(res) {
+    setLoading(false)
     setListInventory(res.data.data.inventory);
     setPage(res.data.data.pagination.currentpage);
+   }
   };
 
   const handleNext = () => {
@@ -84,7 +89,13 @@ export default function DashboardInventory() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {listinventory.map((inv: any, index: number) => (
+            {loading ? <TableRow>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
+              <TableCell>Loading inventory data ...</TableCell>
+              <TableCell></TableCell>
+            </TableRow> : listinventory.map((inv: any, index: number) => (
               <TableRow key={index}>
                 <TableCell>{page > 1 ? index + 1 + 5 : index + 1}</TableCell>
 

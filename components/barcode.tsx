@@ -9,8 +9,8 @@ export default function CustomBarcode({ value }: { value: string }) {
   if (barcodeRef.current) {
     JsBarcode(barcodeRef.current, value, {
       format: "CODE128", // Format barcode EAN-13
-      width: 2,
-      height: 50,
+      width: 1,
+      height: 30,
       displayValue: true, // Menampilkan nilai di bawah barcode
     });
   }
