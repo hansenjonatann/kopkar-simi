@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import axios from "axios";
 import { useEffect, useState, FormEvent } from "react";
 import toast from "react-hot-toast";
+import * as XLSX from 'xlsx';
 
 interface Customer {
   customerCode: string;
@@ -45,6 +46,7 @@ interface NewCustomer {
 export default function DashboardCustomerPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalImportOpen , setIsModalImportOpen] = useState<boolean>(false)
   const [newCustomer, setNewCustomer] = useState<NewCustomer>({
     name: "",
     nik: "",
@@ -54,6 +56,60 @@ export default function DashboardCustomerPage() {
     transactionLimit: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [importFile , setImportFile ] = useState<File | null>(null);
+
+
+
+const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = async (event: ProgressEvent<FileReader>) => {
+      const data = event.target?.result;
+      if (data) {
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0]; // Pilih sheet pertama
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        const generateCustomerCode = () => {
+  const randomPart = Math.floor(1000 + Math.random() * 9000);
+  const timePart = Date.now().toString().slice(-4); // ambil 4 digit terakhir waktu
+  return `CU-${randomPart}${timePart}`;
+};
+
+console.log(generateCustomerCode());
+// Hasil: CU-48237645 (unik)
+
+        const formattedData = jsonData.map((row: any) => ({
+          customerCode: generateCustomerCode,
+          name: row["Name"], // Pastikan kolom sesuai dengan nama di Excel
+          nik: row["NIK"],
+          address: row["Address"],
+          phone: row["Phone"],
+          department: row["Department"],
+          transactionLimit: row['Limit'],
+        }));
+
+        console.log("Formatted data: ", formattedData);
+
+        try {
+          const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}customer/import`, formattedData);
+          if (res.status === 200) {
+            toast.success("Customers berhasil diimpor!");
+            fetchCustomers();
+          } else {
+            toast.error("Import failed");
+          }
+        } catch (error) {
+          console.error("Import error:", error);
+          toast.error("Import failed");
+        }
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+};
 
   const fetchCustomers = async () => {
     try {
@@ -106,6 +162,7 @@ export default function DashboardCustomerPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-bold">Customers</h1>
+        <div className="flex gap-x-2">
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
             <Button>Add New Customer</Button>
@@ -183,6 +240,34 @@ export default function DashboardCustomerPage() {
             </form>
           </DialogContent>
         </Dialog>
+
+        <Dialog   open={isModalImportOpen} onOpenChange={setIsModalImportOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-green-700 text-white transition-all ease-in-out duration-500 text-center hover:bg-green-500 ">Import from Excel</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Import Customer Data From Excel</DialogTitle>
+            </DialogHeader>
+             
+             
+              <div>
+                <Label htmlFor="file">File</Label>
+                <Input
+                  id="file"
+                  name="file"
+                  type="file"
+                  accept=".xlsx, .xls"
+                  onChange={handleFileChange}
+                  required
+                />
+              </div>
+      
+          </DialogContent>
+        </Dialog>
+        </div>
+        
+        
       </div>
 
       <Table>
