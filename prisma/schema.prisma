@@ -120,10 +120,17 @@ model Loan {
   principalInstallment Int
   totalLoan Int
   duration Int
+  status Status @default(PENDING)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
 
+}
+
+enum Status {
+  APPROVE 
+  DECLINE 
+  PENDING
 }
 model SaleItem {
   id        String @id @default(uuid())

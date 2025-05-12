@@ -41,6 +41,16 @@ export const POST = async (req: NextRequest) => {
     const dueDate = new Date(loanDate);
     dueDate.setMonth(dueDate.getMonth() + Number(body.duration));
 
+    const year = new Date().getFullYear()
+
+    if(year % 4 == 0) {
+      const leapYear = 366
+    } else {
+      const leapYear = 365
+    }
+
+
+
     const interestRate = body.interestRate;
     const interestPerMonth = (body.loanAmount * (interestRate / 100)) / 12;
     const totalInterest = interestPerMonth * body.duration;

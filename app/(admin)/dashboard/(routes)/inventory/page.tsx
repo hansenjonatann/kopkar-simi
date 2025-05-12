@@ -104,12 +104,13 @@ export default function DashboardInventory() {
                 <TableCell>{inv.quantity}</TableCell>
                 <TableCell
                   className={
-                    inv.changeType == "PURCHASE"
-                      ? "text-blue-600"
-                      : "text-green-600"
+                    'm-4'
+                    // inv.changeType == "PURCHASE"
+                    //   ? "text-white bg-blue-600 m-4 px-2 rounded-lg w-[100px]"
+                    //   : "text-white bg-green-600 m-4 px-2 rounded-lg w-[100px]"
                   }
                 >
-                  {inv.changeType}
+                  <div className={inv.changeType == 'PURCHASE' ? 'bg-blue-600 px-2 py-1 text-center text-white rounded-lg w-[100px]' : 'bg-green-600 text-center text-white px-2 rounded-lg w-[100px] py-1 '}>{inv.changeType}</div>
                 </TableCell>
               </TableRow>
             ))}

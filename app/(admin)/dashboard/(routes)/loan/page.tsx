@@ -91,64 +91,16 @@ export default function DashboardLoanPage() {
     fetchLoans();
   }, []);
   return (
-    <>
-      <h1 className="text-xl font-bold">Loan</h1>
-      <div className="mt-4">
+    <div className="p-6">
+     <div className="flex  justify-between items-center mb-6">
+       <h1 className="text-xl font-bold">Loan</h1>
         <Button onClick={() => setIsAddModalOpen(true)}>Add a new Loan</Button>
-      </div>
-      <div className="mt-8">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>#</TableHead>
-              <TableHead>Loan Date</TableHead>
-              <TableHead>Customer</TableHead>
-              <TableHead>Due Date</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Interest Rate ( % )</TableHead>
-              <TableHead>Interest Per Month</TableHead>
-              <TableHead>Total Interest</TableHead>
-              <TableHead>Loan Amount</TableHead>
-              <TableHead>Installment</TableHead>
-              <TableHead>Duration</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loans.map((loan: any, idx: number) => (
-              <TableRow key={idx}>
-                <TableCell>{idx + 1}</TableCell>
-                <TableCell>{formatDate(loan.loanDate)}</TableCell>
-                <TableCell>{loan.customer.name}</TableCell>
-                <TableCell>{formatDate(loan.dueDate)}</TableCell>
-                <TableCell>{loan.typeofLoan}</TableCell>
-                <TableCell>{`${loan.interestRate} %`}</TableCell>
-                <TableCell>
-                  {loan.interestPerMonth.toLocaleString("id")}
-                </TableCell>
-                <TableCell>{loan.totalInterest.toLocaleString("id")}</TableCell>
-                <TableCell>{loan.loanAmount.toLocaleString("id")}</TableCell>
-                <TableCell>{loan.installment.toLocaleString("id")}</TableCell>
-                <TableCell>{`${loan.duration} month`}</TableCell>
-                <TableCell>
-                  <Button
-                    onClick={() => handleDeleteLoan(loan.id)}
-                    variant={"destructive"}
-                  >
-                    <Trash />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
 
-      {/* Modal */}
+        {/* Modal */}
       <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Principal Savings</DialogTitle>
+            <DialogTitle>Add Loan</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleStoreLoan} method={"POST"}>
             <div className="space-y-4">
@@ -216,6 +168,56 @@ export default function DashboardLoanPage() {
           </form>
         </DialogContent>
       </Dialog>
-    </>
+     </div>
+      <div className="mt-8">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>#</TableHead>
+              <TableHead>Loan Date</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead>Due Date</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Interest Rate ( % )</TableHead>
+              <TableHead>Interest Per Month</TableHead>
+              <TableHead>Total Interest</TableHead>
+              <TableHead>Loan Amount</TableHead>
+              <TableHead>Installment</TableHead>
+              <TableHead>Duration</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loans.map((loan: any, idx: number) => (
+              <TableRow key={idx}>
+                <TableCell>{idx + 1}</TableCell>
+                <TableCell>{formatDate(loan.loanDate)}</TableCell>
+                <TableCell>{loan.customer.name}</TableCell>
+                <TableCell>{formatDate(loan.dueDate)}</TableCell>
+                <TableCell>{loan.typeofLoan}</TableCell>
+                <TableCell>{`${loan.interestRate} %`}</TableCell>
+                <TableCell>
+                  {loan.interestPerMonth.toLocaleString("id")}
+                </TableCell>
+                <TableCell>{loan.totalInterest.toLocaleString("id")}</TableCell>
+                <TableCell>{loan.loanAmount.toLocaleString("id")}</TableCell>
+                <TableCell>{loan.installment.toLocaleString("id")}</TableCell>
+                <TableCell>{`${loan.duration} month`}</TableCell>
+                <TableCell>
+                  <Button
+                    onClick={() => handleDeleteLoan(loan.id)}
+                    variant={"destructive"}
+                  >
+                    <Trash />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      
+    </div>
   );
 }

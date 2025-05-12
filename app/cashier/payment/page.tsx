@@ -7,6 +7,8 @@ import { Suspense, FormEvent, useEffect, useState, useMemo } from "react";
 import {  useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/lib/statemanagement/item/store";
 
 function PaymentContent() {
   const [loading, setLoading] = useState(false);
@@ -20,6 +22,14 @@ function PaymentContent() {
 
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState("");
+  const items = useSelector((state: RootState) => state.items.items)
+
+
+  const [isModal , setIsModal] = useState(false)
+
+  const handleOpenNotes = () => setIsModal(true)
+
+
 
   // const router = useRouter();
   const generateChange = useMemo(
@@ -73,7 +83,6 @@ function PaymentContent() {
       change: generateChange,
     };
 
-    console.log("Payload to API:", payload); // Debugging payload
 
     try {
       setLoading(true);
@@ -82,7 +91,7 @@ function PaymentContent() {
         payload
       );
       toast.success(res.data.message);
-      handlePrint()
+      handleOpenNotes()
       // router.push("/cashier/transaction");
       // router.refresh()
     } catch (error) {
@@ -98,6 +107,7 @@ function PaymentContent() {
   }
 
   return (
+    <>
     <div className="m-6">
       <h1 className="text-2xl font-bold text-center">Sale Details</h1>
       <div className="mt-6">
@@ -176,6 +186,31 @@ function PaymentContent() {
         </div>
       </div>
     </div>
+
+    {isModal && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm  ">
+      <div className="bg-white w-[420px] h-[400px] rounded-lg shadow-xl">
+        <h1 className="text-center text-xl font-bold mt-4">KOPKAR BATAMAS MEGAH</h1>
+        <div className="mt-8 mx-3">
+          <h1>Item Details</h1>
+          <hr className="border border-black mt-2"/>
+
+          <div className="mt-4">
+                <div  className="flex flex-col text-black ">
+              {items.map((item: any  , idx: number) => (
+                  <div key={idx} className="flex items-center justify-between">
+                    <h1>{item.name}</h1>
+                    <div className="flex flex-col">
+                    <h1>@1</h1>
+                    </div>
+                    <h1>{item.price.toLocaleString('id')}</h1>
+                  </div>
+                ))}
+                </div>
+              </div>
+        </div>
+      </div>
+    </div>}
+    </>
   );
 }
 

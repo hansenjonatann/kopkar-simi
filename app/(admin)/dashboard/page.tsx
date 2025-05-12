@@ -134,9 +134,9 @@ export default function Dashboardpage() {
                         <TableCell>{customer.customerCode}</TableCell>
                         <TableCell>{customer.name}</TableCell>
                         <TableCell>
-                          {customer.savings[0].nominalSavings.toLocaleString(
-                            "id"
-                          )}
+                          {customer.savings[0].nominalSavings && customer.savings[0].nominalSavings.toLocaleString(
+                            "id" 
+                          ) }
                         </TableCell>
                       </TableRow>
                     ))}
@@ -173,7 +173,7 @@ export default function Dashboardpage() {
                       <TableCell>Total </TableCell>
                       <TableCell></TableCell>
                       <TableCell></TableCell>
-                      <TableCell>{totalLoans.toLocaleString("id")}</TableCell>
+                      <TableCell>{ totalLoans !== 0 ? totalLoans?.toLocaleString("id") : 0 }</TableCell>
                     </TableRow>
                   </TableFooter>
                 </Table>

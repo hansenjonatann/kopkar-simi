@@ -1,77 +1,85 @@
 "use client";
 
-import CustomForm from "@/components/custom-form";
 import { Button } from "@/components/ui/button";
+import CustomForm from "@/components/custom-form";
 import { useRole } from "@/hooks/use-role";
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import toast from "react-hot-toast";
 
+interface RoleRedirects {
+  [key: string]: string;
+}
+
+const roleRedirects: RoleRedirects = {
+  ADMIN: "/dashboard",
+  MANAGER: "/dashboard",
+  ADMIN_LOANANDSAVINGS: "/dashboard",
+  CASHIER: "/cashier/transaction",
+};
+
 export default function SignInPage() {
-  const [username, setUsername] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [loading, setLoading] = useState(false);
-  const { role } = useRole();
-  const session = useSession();
-
-
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const { role, isLoading: isSessionLoading } = useRole();
   const router = useRouter();
-  const handleLogin = async (e: any) => {
+  const [isSignedIn, setIsSignedIn] = useState(false);
+
+  // Handle redirect after successful sign-in and session update
+  useEffect(() => {
+    if (isSignedIn && !isSessionLoading && role) {
+      const redirectPath = roleRedirects[role];
+      if (redirectPath) {
+        router.push(redirectPath);
+      } else {
+        toast.error("Role not assigned. Contact administrator.");
+        router.push("/"); // Default redirect for unassigned roles
+      }
+    }
+  }, [isSignedIn, isSessionLoading, role, router]);
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading(true);
+
     try {
-      setLoading(true);
-      const res = await signIn("credentials", {
+      const result = await signIn("credentials", {
         username,
         password,
         redirect: false,
       });
 
-      if (!res || res.error) {
-        setLoading(false);
-        // Login gagal
+      if (result?.error) {
         toast.error("Invalid Credentials!");
+        setIsLoading(false);
+        return;
       }
 
-      if (res) {
-        setLoading(false);
-        console.log(username , password)
-
-        if (
-          role === "ADMIN" ||
-          role === "MANAGER" ||
-          role == "ADMIN_LOANANDSAVINGS"
-        ) {
-          localStorage.setItem("token", String(session.data?.user.id));
-          router.push("/dashboard");
-        } else if (role === "CASHIER") {
-          localStorage.setItem("token", String(session.data?.user.id));
-
-          router.push("/cashier/transaction");
-        }
-      }
-      // Login berhasil
+      // Mark as signed in to trigger useEffect
+      setIsSignedIn(true);
     } catch (error) {
-      setLoading(false);
-      console.log(error);
+      console.log("Sign-in error:", error);
       toast.error("Something went wrong. Please try again.");
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center h-screen justify-center">
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <form
         method="POST"
-        onSubmit={handleLogin}
-        className="border text-secondary bg-primary  p-6 w-[400px] h-[390px] rounded-md shadow-lg"
-        autoComplete="false"
+        onSubmit={handleSubmit}
+        className="w-full max-w-md rounded-md border bg-white p-8 shadow-lg"
+        autoComplete="off"
       >
-        <h1 className="text-center text-3xl font-bold text-secondary uppercase">
-          SIGN IN
+        <h1 className="mb-6 text-center text-3xl font-bold uppercase text-gray-800">
+          Sign In
         </h1>
 
-        <div className="flex flex-col">
+        <div className="space-y-4">
           <CustomForm
             label="Username"
             name="username"
@@ -85,22 +93,21 @@ export default function SignInPage() {
             onchange={(e) => setPassword(e.target.value)}
           />
 
-          <div className="mt-4">
-            <Button
-              type="submit"
-              className="w-full text-primary  font-bold uppercase"
-              variant={"secondary"}
-            >
-              {loading ? "Signin In..." : "Sign In"}
-            </Button>
-          </div>
-          <small className="text-center mt-4">
-            {"Don't have an account?"}{" "}
-            <Link className="font-bold" href={"/sign-up"}>
+          <Button
+            type="submit"
+            className="w-full font-bold uppercase"
+            variant="default"
+            disabled={isLoading || isSessionLoading}
+          >
+            {isLoading ? "Signing In..." : "Sign In"}
+          </Button>
+
+          <p className="text-center text-sm text-gray-600">
+            {"Don't have an account?"}
+            <Link href="/sign-up" className="font-bold text-blue-600 hover:underline">
               Sign Up
-            </Link>{" "}
-            here
-          </small>
+            </Link>
+          </p>
         </div>
       </form>
     </div>

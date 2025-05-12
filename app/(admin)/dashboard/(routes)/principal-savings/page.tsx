@@ -58,6 +58,7 @@ export default function DashboardPrincipalSavingsPage() {
         setIsLoading(false);
         toast.success(res.data.message);
         setIsAddModalOpen(false);
+        fetchPrincipalSavings()
       }
     } catch (error) {
       console.log(error);
@@ -70,42 +71,14 @@ export default function DashboardPrincipalSavingsPage() {
   }, []);
 
   return (
-    <>
+    <div className="p-6">
+    <div className="flex justify-between items-center mb-6">
       <h1 className="text-xl font-bold">Principal Savings</h1>
-      <div className="mt-4">
         <Button onClick={() => setIsAddModalOpen(true)}>
           Add a new Principal Savings
         </Button>
-      </div>
 
-      <div className="mt-8">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>#</TableHead>
-              <TableHead>Customer</TableHead>
-              <TableHead>Save Date</TableHead>
-              <TableHead>Nominal Savings</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {principalSavings.map((prsv: any, index: number) => (
-              <TableRow key={index}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell>{prsv.customer.name}</TableCell>
-                <TableCell>{prsv.saveDate}</TableCell>
-                <TableCell>
-                  {prsv.nominalSavings.toLocaleString("id")}
-                </TableCell>
-                <TableCell>-</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* Modal */}
+        {/* Modal */}
       <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
         <DialogContent>
           <DialogHeader>
@@ -157,6 +130,37 @@ export default function DashboardPrincipalSavingsPage() {
           </form>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
+      
+
+      <div className="mt-8">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>#</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead>Save Date</TableHead>
+              <TableHead>Nominal Savings</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {principalSavings.map((prsv: any, index: number) => (
+              <TableRow key={index}>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>{prsv.customer.name}</TableCell>
+                <TableCell>{prsv.saveDate}</TableCell>
+                <TableCell>
+                  {prsv.nominalSavings.toLocaleString("id")}
+                </TableCell>
+                <TableCell>-</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      
+    </div>
   );
 }
