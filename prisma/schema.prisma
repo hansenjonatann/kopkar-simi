@@ -23,17 +23,44 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+model WholesalerUnit {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+}
+
+model RetailUnit {
+  id   String @id @default(uuid())
+  name String
+  slug String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+}
+
 model Product {
-  id          String   @id @default(uuid())
-  name        String
-  code        String
-  description String?
-  price       Int      @default(0)
-  cost        Int      @default(0)
-  stock       Int      @default(0)
-  categoryId  String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String         @id @default(uuid())
+  name            String
+  code            String
+  description     String?
+  price           Int            @default(0)
+  cost            Int            @default(0)
+  stock           Int            @default(0)
+  retailStock     Int            @default(0)
+  wholesaleStock  Int            @default(0)
+  retailunitId    String
+  retailUnit      RetailUnit     @relation(fields: [retailunitId], references: [id])
+  wholesaleunitId String
+  wholesaleUnit   WholesalerUnit @relation(fields: [wholesaleunitId], references: [id])
+  categoryId      String
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
   category      Category       @relation(fields: [categoryId], references: [id])
   SaleItems     SaleItem[]
@@ -52,36 +79,36 @@ model Category {
 }
 
 model Customer {
-  id String @id @default(uuid())
-  customerCode String
-  name String
-  nik String
-  address String
-  phone String
-  department String
+  id               String   @id @default(uuid())
+  customerCode     String
+  name             String
+  nik              String
+  address          String
+  phone            String
+  department       String
   transactionLimit Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  sales Sale[]
-  loans Loan[]
+  sales   Sale[]
+  loans   Loan[]
   savings PrincipalSavings[]
 }
 
 model PrincipalSavings {
-  id String @id @default(uuid())
-  customerId String
-  customer Customer @relation(fields: [customerId] , references: [id])
-  saveDate String
+  id             String   @id @default(uuid())
+  customerId     String
+  customer       Customer @relation(fields: [customerId], references: [id])
+  saveDate       String
   nominalSavings Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
+
 model Sale {
   id          String        @id @default(uuid())
-  customerId String
-  customer Customer @relation(fields: [customerId] , references: [id])
+  customerId  String
+  customer    Customer      @relation(fields: [customerId], references: [id])
   date        String
   discount    Int?
   subtotal    Int
@@ -104,34 +131,32 @@ model Transaction {
   Sale Sale @relation(fields: [saleId], references: [id])
 }
 
-
 model Loan {
-  id String @id @default(uuid())
-  customerId String
-  customer Customer @relation(fields: [customerId] , references: [id])
-  loanDate String
-  dueDate String
-  typeofLoan TypeOfLoan
-  interestRate Int
-  interestPerMonth Int
-  totalInterest Int
-  loanAmount Int
-  installment Int
+  id                   String     @id @default(uuid())
+  customerId           String
+  customer             Customer   @relation(fields: [customerId], references: [id])
+  loanDate             String
+  dueDate              String
+  typeofLoan           TypeOfLoan
+  interestRate         Int
+  interestPerMonth     Int
+  totalInterest        Int
+  loanAmount           Int
+  installment          Int
   principalInstallment Int
-  totalLoan Int
-  duration Int
-  status Status @default(PENDING)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-
+  totalLoan            Int
+  duration             Int
+  status               Status     @default(PENDING)
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
 }
 
 enum Status {
-  APPROVE 
-  DECLINE 
+  APPROVE
+  DECLINE
   PENDING
 }
+
 model SaleItem {
   id        String @id @default(uuid())
   saleId    String

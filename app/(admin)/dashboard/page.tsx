@@ -111,7 +111,7 @@ export default function Dashboardpage() {
             />
             <DashboardCard
               title="Total Loan"
-              content={`${loans.length} Transaction`}
+              content={`${loans.length > 0 ? loans.length : 0} Transaction`}
             />
           </div>
           <div className="mx-3 mt-8">
@@ -120,28 +120,31 @@ export default function Dashboardpage() {
                 <Link href={"/dashboard/customer"} className="font-bold">
                   Customer
                 </Link>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Customer Code</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Principal Savings</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {customers.map((customer: any, index: number) => (
-                      <TableRow key={index}>
-                        <TableCell>{customer.customerCode}</TableCell>
-                        <TableCell>{customer.name}</TableCell>
-                        <TableCell>
-                          {customer.savings[0].nominalSavings && customer.savings[0].nominalSavings.toLocaleString(
-                            "id" 
-                          ) }
-                        </TableCell>
+                <div className="h-screen overflow-y-scroll">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Customer Code</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Principal Savings</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {customers.map((customer: any, index: number) => (
+                        <TableRow key={index}>
+                          <TableCell>{customer.customerCode}</TableCell>
+                          <TableCell>{customer.name}</TableCell>
+                          <TableCell>
+                            {customer.savings[0]?.nominalSavings &&
+                              customer.savings[0].nominalSavings.toLocaleString(
+                                "id"
+                              )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
               <div className="flex flex-col">
                 <Link href={"/dashboard/loan"} className="font-bold">
@@ -173,7 +176,11 @@ export default function Dashboardpage() {
                       <TableCell>Total </TableCell>
                       <TableCell></TableCell>
                       <TableCell></TableCell>
-                      <TableCell>{ totalLoans !== 0 ? totalLoans?.toLocaleString("id") : 0 }</TableCell>
+                      <TableCell>
+                        {totalLoans !== 0
+                          ? totalLoans?.toLocaleString("id")
+                          : 0}
+                      </TableCell>
                     </TableRow>
                   </TableFooter>
                 </Table>
