@@ -133,6 +133,7 @@ model Transaction {
 
 model Loan {
   id                   String     @id @default(uuid())
+  loanCode             String
   customerId           String
   customer             Customer   @relation(fields: [customerId], references: [id])
   loanDate             String
@@ -145,16 +146,53 @@ model Loan {
   installment          Int
   principalInstallment Int
   totalLoan            Int
+  totalInstallment     Int
   duration             Int
   status               Status     @default(PENDING)
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
+
+  totalPaid          Int        @default(0)
+  accruedInterest    Int        @default(0)
+  remainingPrincipal Int        @default(0)
+  isPaidOff          PaidStatus @default(UNPAID)
+
+  payment      Payment[]
+  interestLogs AccruedInterestLog[]
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  paymentDate   DateTime
+  loanId        String
+  loan          Loan     @relation(fields: [loanId], references: [id])
+  paymentAmount Int // nominal yang dibayarkan user
+  interestRate  Float // bunga berjalan, misalnya 0.03 (3%)
+  totalInterest Int
+  totalDue      Int // paymentAmount + bunga berjalan
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model AccruedInterestLog {
+  id        String   @id @default(uuid())
+  loanId    String
+  loan      Loan     @relation(fields: [loanId], references: [id])
+  date      DateTime
+  amount    Int
+  note      String?
+  createdAt DateTime @default(now())
 }
 
 enum Status {
   APPROVE
   DECLINE
   PENDING
+}
+
+enum PaidStatus {
+  UNPAID
+  PAID
 }
 
 model SaleItem {

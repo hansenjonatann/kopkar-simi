@@ -41,15 +41,26 @@ export const POST = async (req: NextRequest) => {
     const dueDate = new Date(loanDate);
     dueDate.setMonth(dueDate.getMonth() + Number(body.duration));
 
-    const year = new Date().getFullYear()
+    async function generateLoanCode(): Promise<string> {
+      const year = new Date().getFullYear();
 
-    if(year % 4 == 0) {
-      const leapYear = 366
-    } else {
-      const leapYear = 365
+      let code: string;
+      let exists = true;
+
+      while (exists) {
+        code = `LN-${year}${Math.floor(Math.random() * 9999999)}`;
+
+        const existingLoan = await db.loan.findFirst({
+          where: {
+            loanCode: code,
+          },
+        });
+
+        exists = !!existingLoan; // true kalau sudah ada
+      }
+
+      return code!;
     }
-
-
 
     const interestRate = body.interestRate;
     const interestPerMonth = (body.loanAmount * (interestRate / 100)) / 12;
@@ -59,10 +70,11 @@ export const POST = async (req: NextRequest) => {
 
     const installment = totalLoan / body.duration;
 
-    const totalInstallment = installment + totalInterest;
+    const totalInstallment = installment + interestPerMonth;
 
     const newLoan = await db.loan.create({
       data: {
+        loanCode: await generateLoanCode(),
         customerId: body.customerId,
         loanDate: String(loanDate),
         dueDate: String(dueDate),
@@ -73,8 +85,11 @@ export const POST = async (req: NextRequest) => {
         interestPerMonth,
         totalInterest,
         totalLoan,
-        installment: totalInstallment,
+        installment: installment,
         principalInstallment: installment,
+        totalInstallment,
+        status: "PENDING",
+        remainingPrincipal: body.loanAmount,
       },
     });
     const savings = await db.principalSavings.findFirst({

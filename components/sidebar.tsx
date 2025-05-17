@@ -80,17 +80,18 @@ export default function Sidebar() {
 
   const adminloanandsavingsLink = [
     {
-      id: 1,
       label: "Loan",
       path: "/dashboard/loan",
     },
     {
-      id: 2,
       label: "Principal Savings",
       path: "/dashboard/principal-savings",
     },
     {
-      id: 3,
+      label: "Payment",
+      path: "/dashboard/payment",
+    },
+    {
       label: "Customer",
       path: "/dashboard/customer",
     },
