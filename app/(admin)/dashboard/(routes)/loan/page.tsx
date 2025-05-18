@@ -186,6 +186,7 @@ export default function DashboardLoanPage() {
               <TableHead>Installment</TableHead>
               <TableHead>Total Installment</TableHead>
               <TableHead>Duration</TableHead>
+              <TableHead>Remaining Principal</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -208,7 +209,11 @@ export default function DashboardLoanPage() {
                 <TableCell>
                   {loan.totalInstallment.toLocaleString("id")}
                 </TableCell>
+
                 <TableCell>{`${loan.duration} month`}</TableCell>
+                <TableCell>
+                  {loan.remainingPrincipal.toLocaleString("id")}
+                </TableCell>
                 <TableCell>
                   <Button
                     onClick={() => handleDeleteLoan(loan.id)}

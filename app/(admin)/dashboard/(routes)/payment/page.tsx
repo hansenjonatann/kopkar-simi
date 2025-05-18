@@ -268,8 +268,9 @@ export default function DashboardPaymentPage() {
                   currency: "IDR",
                 })}
               </TableCell>
+              <TableCell>{payment.interestRate || 0}</TableCell>
               <TableCell>
-                {(payment.interestAmount || 0).toLocaleString("id-ID", {
+                {(payment.totalInterest || 0).toLocaleString("id-ID", {
                   style: "currency",
                   currency: "IDR",
                 })}

@@ -103,31 +103,30 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
-    let totalInterest = 0;
-
     // Calculate accrued interest from paymentDate to the 25th of the relevant month
     const calculateAccruedInterestUntil25 = (
       paymentDate: Date,
       remainingPrincipal: number
-    ): number => {
+    ): {
+      interest: number;
+      interestRate: number;
+      activeDays: number;
+    } => {
       let dueDate: Date;
       const paymentYear = paymentDate.getFullYear();
-      const paymentMonth = paymentDate.getMonth(); // 0-indexed
+      const paymentMonth = paymentDate.getMonth();
 
-      // Determine the relevant due date (25th of the payment month or next month if past the 25th)
       if (paymentDate.getDate() <= 25) {
         dueDate = new Date(paymentYear, paymentMonth, 25);
       } else {
-        // If payment is after the 25th, calculate interest until the 25th of the next month
         dueDate = new Date(paymentYear, paymentMonth + 1, 25);
       }
 
       const year = dueDate.getFullYear();
-      const month = dueDate.getMonth() + 1; // Months are 0-indexed, so add 1 for calculateDaysInMonth
+      const month = dueDate.getMonth() + 1;
       const daysInMonth = calculateDaysInMonth(month, year);
 
-      const interestPerDay = 0.6 / daysInMonth / 100; // 0.6% monthly rate
-      console.log({ interestPerDay });
+      const interestPerDay = 0.006 / daysInMonth;
 
       const activeDays = Math.max(
         0,
@@ -136,30 +135,30 @@ export const POST = async (req: NextRequest) => {
         )
       );
 
-      console.log("Active Days:", activeDays);
-
       const interest = interestPerDay * activeDays * remainingPrincipal;
-      totalInterest = interestPerDay * activeDays;
+      const interestRate = interestPerDay * remainingPrincipal;
 
-      console.log({ totalInterest });
-
-      return Math.round(interest);
+      return {
+        interest: Math.round(interest),
+        interestRate,
+        activeDays,
+      };
     };
 
-    const interest = calculateAccruedInterestUntil25(
-      paymentDateObj,
-      loan.remainingPrincipal
-    );
+    const { interest, interestRate, activeDays } =
+      calculateAccruedInterestUntil25(paymentDateObj, loan.remainingPrincipal);
+
+    const principalPaid = Math.max(0, paymentAmount - interest);
 
     // Save to database
     const payment = await db.payment.create({
       data: {
         paymentDate: paymentDateObj,
-        loanId: loanId,
-        paymentAmount: paymentAmount,
-        interestRate: interest / loan.remainingPrincipal, // Interest as a percentage of remaining principal
-        totalInterest,
-        totalDue: paymentAmount + interest,
+        loanId,
+        paymentAmount,
+        interestRate, // Interest as a percentage of remaining principal
+        totalInterest: interest,
+        totalDue: paymentAmount,
       },
     });
 
@@ -167,16 +166,14 @@ export const POST = async (req: NextRequest) => {
     if (payment) {
       const newRemainingPrincipal = Math.max(
         0,
-        loan.remainingPrincipal - interest
-          ? paymentAmount + interest
-          : paymentAmount
+        loan.remainingPrincipal - principalPaid
       );
 
       await db.loan.update({
         where: { id: loanId },
         data: {
           remainingPrincipal: newRemainingPrincipal,
-          totalPaid: loan.totalPaid + paymentAmount + interest,
+          totalPaid: loan.totalPaid + paymentAmount,
           isPaidOff: newRemainingPrincipal === 0 ? "PAID" : "UNPAID",
           accruedInterest: interest, // Track accrued interest
         },
