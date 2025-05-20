@@ -90,9 +90,10 @@ model Customer {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  sales   Sale[]
-  loans   Loan[]
-  savings PrincipalSavings[]
+  sales    Sale[]
+  loans    Loan[]
+  savings  PrincipalSavings[]
+  payments Payment[]
 }
 
 model PrincipalSavings {
@@ -139,7 +140,7 @@ model Loan {
   loanDate             String
   dueDate              String
   typeofLoan           TypeOfLoan
-  interestRate         Int
+  interestRate         Decimal
   interestPerMonth     Int
   totalInterest        Int
   loanAmount           Int
@@ -163,6 +164,8 @@ model Loan {
 
 model Payment {
   id            String   @id @default(uuid())
+  customerId    String
+  customer      Customer @relation(fields: [customerId], references: [id])
   paymentDate   DateTime
   loanId        String
   loan          Loan     @relation(fields: [loanId], references: [id])
@@ -170,6 +173,7 @@ model Payment {
   interestRate  Float // bunga berjalan, misalnya 0.03 (3%)
   totalInterest Int
   totalDue      Int // paymentAmount + bunga berjalan
+  penalty       Int
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }

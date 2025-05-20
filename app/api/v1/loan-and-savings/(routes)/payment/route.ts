@@ -37,6 +37,7 @@ export const GET = async () => {
     const payments = await db.payment.findMany({
       include: {
         loan: true,
+        customer: true,
       },
     });
 
@@ -60,7 +61,6 @@ export const GET = async () => {
 export const POST = async (req: NextRequest) => {
   try {
     const body = await req.json();
-
     const { paymentAmount, loanId, paymentDate } = body;
 
     const paymentDateObj = new Date(paymentDate);
@@ -75,7 +75,6 @@ export const POST = async (req: NextRequest) => {
         { status: 400 }
       );
     }
-
     if (isNaN(paymentDateObj.getTime())) {
       return NextResponse.json(
         { error: "Invalid payment date" },
@@ -105,28 +104,20 @@ export const POST = async (req: NextRequest) => {
 
     // Calculate accrued interest from paymentDate to the 25th of the relevant month
     const calculateAccruedInterestUntil25 = (
-      paymentDate: Date,
-      remainingPrincipal: number
+      paymentDate: Date
     ): {
       interest: number;
-      interestRate: number;
       activeDays: number;
     } => {
-      let dueDate: Date;
       const paymentYear = paymentDate.getFullYear();
       const paymentMonth = paymentDate.getMonth();
+      let dueDate: Date;
 
       if (paymentDate.getDate() <= 25) {
         dueDate = new Date(paymentYear, paymentMonth, 25);
       } else {
         dueDate = new Date(paymentYear, paymentMonth + 1, 25);
       }
-
-      const year = dueDate.getFullYear();
-      const month = dueDate.getMonth() + 1;
-      const daysInMonth = calculateDaysInMonth(month, year);
-
-      const interestPerDay = 0.006 / daysInMonth;
 
       const activeDays = Math.max(
         0,
@@ -135,39 +126,80 @@ export const POST = async (req: NextRequest) => {
         )
       );
 
-      const interest = interestPerDay * activeDays * remainingPrincipal;
-      const interestRate = interestPerDay * remainingPrincipal;
+      const getTanggal30Safe = (year: any, month: any) => {
+        const tgl30 = new Date(year, month, 30);
+        if (tgl30.getMonth() !== month) {
+          return new Date(year, month + 1, 0);
+        }
+        return tgl30;
+      };
+
+      const akhirBulan = getTanggal30Safe(paymentYear, paymentMonth);
+
+      const selisih = Math.max(
+        0,
+        Math.ceil(
+          (akhirBulan.getTime() - paymentDate.getTime()) / (1000 * 60 * 60 * 24)
+        )
+      );
+
+      const fullMonthlyInterest = loan.totalInterest;
+      const fixCalculate = 30 - 25;
+      const duration = fixCalculate + selisih;
+      const interest = (duration * fullMonthlyInterest) / 30;
 
       return {
         interest: Math.round(interest),
-        interestRate,
         activeDays,
       };
     };
 
-    const { interest, interestRate, activeDays } =
-      calculateAccruedInterestUntil25(paymentDateObj, loan.remainingPrincipal);
+    const isPayoff = paymentAmount >= loan.remainingPrincipal;
+    const jatuhTempo = new Date(
+      paymentDateObj.getFullYear(),
+      paymentDateObj.getMonth(),
+      25
+    );
+    const isBeforeDueDate = paymentDateObj < jatuhTempo;
 
-    const principalPaid = Math.max(0, paymentAmount - interest);
+    // Initialize interest and penalty
+    let interest = 0;
+    let penalty = 0;
+
+    // Calculate accrued interest if payment is before due date
+    if (isBeforeDueDate) {
+      const { interest: calculatedInterest } =
+        calculateAccruedInterestUntil25(paymentDateObj);
+      interest = calculatedInterest;
+      penalty = Math.round(0.01 * loan.loanAmount);
+    }
+
+    const totalDue =
+      isPayoff && isBeforeDueDate
+        ? loan.remainingPrincipal + interest + penalty
+        : paymentAmount;
+
+    const principalPaid = Math.max(0, paymentAmount);
 
     // Save to database
     const payment = await db.payment.create({
       data: {
+        customerId: loan.customerId,
         paymentDate: paymentDateObj,
         loanId,
         paymentAmount,
-        interestRate, // Interest as a percentage of remaining principal
+        interestRate: Number(loan.interestRate),
         totalInterest: interest,
-        totalDue: paymentAmount,
+        totalDue: totalDue,
+        penalty,
       },
     });
 
     // Update the loan
     if (payment) {
-      const newRemainingPrincipal = Math.max(
-        0,
-        loan.remainingPrincipal - principalPaid
-      );
+      const newRemainingPrincipal = isPayoff
+        ? 0
+        : Math.max(0, loan.remainingPrincipal - principalPaid);
 
       await db.loan.update({
         where: { id: loanId },
@@ -175,12 +207,15 @@ export const POST = async (req: NextRequest) => {
           remainingPrincipal: newRemainingPrincipal,
           totalPaid: loan.totalPaid + paymentAmount,
           isPaidOff: newRemainingPrincipal === 0 ? "PAID" : "UNPAID",
-          accruedInterest: interest, // Track accrued interest
+          accruedInterest: interest, // Always update accruedInterest
         },
       });
     }
 
-    return NextResponse.json({ payment });
+    return NextResponse.json({
+      success: true,
+      message: "Payment created",
+    });
   } catch (error) {
     return NextResponse.json(
       { error: (error as Error).message || "Unknown error" },

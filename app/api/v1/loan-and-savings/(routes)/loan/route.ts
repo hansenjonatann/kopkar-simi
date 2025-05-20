@@ -62,7 +62,7 @@ export const POST = async (req: NextRequest) => {
       return code!;
     }
 
-    const interestRate = body.interestRate;
+    const interestRate = 0.6;
     const interestPerMonth = (body.loanAmount * (interestRate / 100)) / 12;
     const totalInterest = interestPerMonth * body.duration;
 
@@ -70,7 +70,7 @@ export const POST = async (req: NextRequest) => {
 
     const installment = totalLoan / body.duration;
 
-    const totalInstallment = installment + interestPerMonth;
+    const totalInstallment = installment + totalInterest;
 
     const newLoan = await db.loan.create({
       data: {

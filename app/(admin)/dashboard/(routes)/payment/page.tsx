@@ -16,6 +16,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -31,13 +32,13 @@ export default function DashboardPaymentPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [loans, setLoans] = useState<Loan[]>([]);
   // Form state
-  const [loanId, setLoanId] = useState("");
+  const [loanId, setLoanId] = useState<string>("");
   const [paymentDate, setPaymentDate] = useState(
-    new Date().toISOString().split("T")[0]
-  ); // Default to today: 17 May 2025
+    new Date().toISOString().split("T")[0] // Defaults to today: 2025-05-20
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [paymentAmount, setPaymentAmount] = useState(0);
-  const [totalLoan, setTotalLoan] = useState(0);
+  const [paymentAmount, setPaymentAmount] = useState<number>(0);
+  const [totalLoan, setTotalLoan] = useState<number>(0);
 
   const fetchPayments = async () => {
     try {
@@ -45,7 +46,7 @@ export default function DashboardPaymentPage() {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}loan-and-savings/payment`
       );
-      if (response) {
+      if (response.data) {
         setPayments(response.data.data);
       }
     } catch (error) {
@@ -56,12 +57,33 @@ export default function DashboardPaymentPage() {
     }
   };
 
+  const totalPokok = payments.reduce(
+    (acc, p: any) => acc + (p.loan?.principalInstallment || 0),
+    0
+  );
+  const totalBagiHasil = payments.reduce(
+    (acc, p: any) => acc + (p.loan?.totalInterest || 0),
+    0
+  );
+  const totalBerjalan = payments.reduce(
+    (acc, p: any) => acc + (p.totalInterest || 0),
+    0
+  );
+  const totalSemua = payments.reduce(
+    (acc, p: any) =>
+      acc +
+      (p.loan?.principalInstallment || 0) +
+      (p.totalInterest || 0) +
+      (p.loan?.totalInterest || 0),
+    0
+  );
+
   const fetchLoans = async () => {
     try {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}loan-and-savings/loan`
       );
-      if (response) {
+      if (response.data) {
         setLoans(response.data.data);
       }
     } catch (error) {
@@ -75,48 +97,22 @@ export default function DashboardPaymentPage() {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}loan-and-savings/loan/detail?id=${id}`
       );
-
-      if (response) {
-        console.log(response);
-        setTotalLoan(response.data.data.remainingPrincipal);
-        setPaymentAmount(response.data.data.totalInstallment); // Set paymentAmount to loanAmount
+      if (response.data) {
+        setTotalLoan(response.data.data.remainingPrincipal || 0);
+        setPaymentAmount(response.data.data.principalInstallment || 0);
       }
     } catch (error) {
       console.log(error);
       toast.error("Failed to fetch loan details.");
-      setPaymentAmount(0); // Reset paymentAmount on error
+      setPaymentAmount(0);
     }
   };
-
-  useEffect(() => {
-    fetchPayments();
-    fetchLoans();
-  }, []);
-
-  // Fetch loan details when loanId changes
-  useEffect(() => {
-    if (loanId) {
-      fetchSelectedLoan(loanId);
-    } else {
-      setPaymentAmount(0); // Reset paymentAmount when no loan is selected
-    }
-  }, [loanId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!loanId || !paymentDate || paymentAmount <= 0) {
       toast.error("Please fill in all fields correctly.");
-      return;
-    }
-
-    try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}loan-and-savings/loan/detail?loanId=${loanId}`
-      );
-    } catch (error) {
-      console.log(error);
-      toast.error("Failed to fetch loan details.");
       return;
     }
 
@@ -145,6 +141,26 @@ export default function DashboardPaymentPage() {
       setIsSubmitting(false);
     }
   };
+
+  const maxDate = new Date().getDate() >= 26;
+
+  if (new Date(paymentDate).getDate() >= 26) {
+    toast.error("Sorry your transaction can not be run after date : 25");
+  }
+
+  useEffect(() => {
+    fetchPayments();
+    fetchLoans();
+  }, []);
+
+  useEffect(() => {
+    if (loanId) {
+      fetchSelectedLoan(loanId);
+    } else {
+      setPaymentAmount(0);
+      setTotalLoan(0);
+    }
+  }, [loanId]);
 
   return (
     <>
@@ -183,23 +199,25 @@ export default function DashboardPaymentPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="paymentDate">Payment Date</Label>
+                <Label htmlFor="paymentDate">
+                  Payment Date ( Max Transaction Date : 25 )
+                </Label>
                 <Input
                   id="paymentDate"
                   type="date"
                   value={paymentDate}
                   onChange={(e) => setPaymentDate(e.target.value)}
                   required
-                  min={new Date().toISOString().split("T")[0]} // Restrict to today or future
+                  disabled={maxDate}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="paymentAmount">Remaining Principal</Label>
+                <Label htmlFor="totalLoan">Remaining Principal</Label>
                 <Input
-                  id="paymentAmount"
-                  type="number"
-                  value={totalLoan}
+                  id="totalLoan"
+                  type="text"
+                  value={totalLoan.toLocaleString("id-ID")}
                   readOnly
                   className="bg-gray-100"
                 />
@@ -209,8 +227,8 @@ export default function DashboardPaymentPage() {
                 <Label htmlFor="paymentAmount">Payment Amount</Label>
                 <Input
                   id="paymentAmount"
-                  type="number"
-                  value={paymentAmount}
+                  type="text"
+                  value={paymentAmount.toLocaleString("id-ID")}
                   readOnly
                   className="bg-gray-100"
                 />
@@ -241,12 +259,14 @@ export default function DashboardPaymentPage() {
         <TableHeader>
           <TableRow>
             <TableHead>#</TableHead>
-            <TableHead>Loan Code</TableHead>
-            <TableHead>Payment Amount</TableHead>
-            <TableHead>Interest</TableHead>
-            <TableHead>Total Interest </TableHead>
-            <TableHead>Total Due</TableHead>
-            <TableHead>Payment Date</TableHead>
+            <TableHead>NIK</TableHead>
+            <TableHead>Nama</TableHead>
+            <TableHead>Cicilan Pokok</TableHead>
+            <TableHead>Cicilan Bagi Hasil</TableHead>
+            <TableHead>Bagi Hasil Berjalan</TableHead>
+            <TableHead>Penalty</TableHead>
+            <TableHead>Total</TableHead>
+            <TableHead>Tanggal Transaksi</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -261,25 +281,28 @@ export default function DashboardPaymentPage() {
           {payments.map((payment: any, idx) => (
             <TableRow key={idx}>
               <TableCell>{idx + 1}</TableCell>
-              <TableCell>{payment.loan?.loanCode || "-"}</TableCell>
+              <TableCell>{payment.customer?.nik || "-"}</TableCell>
+              <TableCell>{payment.customer?.name || "-"}</TableCell>
               <TableCell>
-                {payment.paymentAmount.toLocaleString("id-ID", {
-                  style: "currency",
-                  currency: "IDR",
-                })}
-              </TableCell>
-              <TableCell>{payment.interestRate || 0}</TableCell>
-              <TableCell>
-                {(payment.totalInterest || 0).toLocaleString("id-ID", {
-                  style: "currency",
-                  currency: "IDR",
-                })}
+                {(payment.loan?.principalInstallment || 0).toLocaleString(
+                  "id-ID"
+                )}
               </TableCell>
               <TableCell>
-                {payment.totalDue.toLocaleString("id-ID", {
-                  style: "currency",
-                  currency: "IDR",
-                })}
+                {(payment.loan?.totalInterest || 0).toLocaleString("id-ID")}
+              </TableCell>
+              <TableCell>
+                {(payment.totalInterest || 0).toLocaleString("id-ID")}
+              </TableCell>
+              <TableCell>
+                {(payment.penalty || 0).toLocaleString("id-ID")}
+              </TableCell>
+              <TableCell>
+                {(
+                  (payment.loan?.principalInstallment || 0) +
+                  (payment.totalInterest || 0) +
+                  (payment.loan?.totalInterest || 0)
+                ).toLocaleString("id-ID")}
               </TableCell>
               <TableCell>
                 {new Date(payment.paymentDate).toLocaleDateString("id-ID")}
@@ -287,6 +310,18 @@ export default function DashboardPaymentPage() {
             </TableRow>
           ))}
         </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TableCell>Total</TableCell>
+            <TableCell></TableCell>
+            <TableCell></TableCell>
+            <TableCell>{totalPokok.toLocaleString("id-ID")}</TableCell>
+            <TableCell>{totalBagiHasil.toLocaleString("id-ID")}</TableCell>
+            <TableCell>{totalBerjalan.toLocaleString("id-ID")}</TableCell>
+            <TableCell></TableCell>
+            <TableCell>{totalSemua.toLocaleString("id-ID")}</TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
     </>
   );

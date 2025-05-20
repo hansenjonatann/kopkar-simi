@@ -139,14 +139,14 @@ export default function DashboardLoanPage() {
                     onChange={(e) => setDuration(Number(e.target.value))}
                   />
                 </div>
-                <div>
+                {/* <div>
                   <Label htmlFor="interestRate">Interest Rate</Label>
                   <Input
                     id="interestRate"
                     type="number"
                     onChange={(e) => setInterestRate(Number(e.target.value))}
                   />
-                </div>
+                </div> */}
                 <div>
                   <Label htmlFor="loanAmount">Loan Amount</Label>
                   <Input
