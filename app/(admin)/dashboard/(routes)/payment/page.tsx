@@ -13,6 +13,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -22,6 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Loan, Payment } from "@prisma/client";
+import { SelectTrigger } from "@radix-ui/react-select";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -31,11 +38,15 @@ export default function DashboardPaymentPage() {
   const [fetching, setFetching] = useState<boolean>(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [loans, setLoans] = useState<Loan[]>([]);
+  const [customers, setCustomers] = useState([]);
   // Form state
   const [loanId, setLoanId] = useState<string>("");
+  const [paymentByCustomers, setPaymentByCustomers] = useState([]);
   const [paymentDate, setPaymentDate] = useState(
     new Date().toISOString().split("T")[0] // Defaults to today: 2025-05-20
   );
+
+  const [customerId, setCustomerId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const [totalLoan, setTotalLoan] = useState<number>(0);
@@ -48,6 +59,7 @@ export default function DashboardPaymentPage() {
       );
       if (response.data) {
         setPayments(response.data.data);
+        setCustomerId('')
       }
     } catch (error) {
       console.log(error);
@@ -57,11 +69,37 @@ export default function DashboardPaymentPage() {
     }
   };
 
+  const fetchCustomers = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}customer`
+      );
+
+      if (response.data) {
+        setCustomers(response.data.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const totalPokok = payments.reduce(
     (acc, p: any) => acc + (p.loan?.principalInstallment || 0),
     0
   );
+
+  const totalPokokPerCustomer = paymentByCustomers.reduce(
+    (acc, p: any) => acc + (p.loan?.principalInstallment || 0),
+    0
+  );
+
+
   const totalBagiHasil = payments.reduce(
+    (acc, p: any) => acc + (p.loan?.totalInterest || 0),
+    0
+  );
+
+  const totalBagiHasilPerCustomer = paymentByCustomers.reduce(
     (acc, p: any) => acc + (p.loan?.totalInterest || 0),
     0
   );
@@ -69,7 +107,21 @@ export default function DashboardPaymentPage() {
     (acc, p: any) => acc + (p.totalInterest || 0),
     0
   );
+
+  const totalBerjalanPerCustomer = paymentByCustomers.reduce(
+    (acc, p: any) => acc + (p.totalInterest || 0),
+    0
+  );
   const totalSemua = payments.reduce(
+    (acc, p: any) =>
+      acc +
+      (p.loan?.principalInstallment || 0) +
+      (p.totalInterest || 0) +
+      (p.loan?.totalInterest || 0),
+    0
+  );
+
+  const totalSemuaPerCustomer = paymentByCustomers.reduce(
     (acc, p: any) =>
       acc +
       (p.loan?.principalInstallment || 0) +
@@ -105,6 +157,20 @@ export default function DashboardPaymentPage() {
       console.log(error);
       toast.error("Failed to fetch loan details.");
       setPaymentAmount(0);
+    }
+  };
+
+  const fetchPaymetByCustomer = async (customer: string) => {
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}loan-and-savings/payment/customer?customer=${customer}`
+      );
+      console.log(response);
+      if (response) {
+        setPaymentByCustomers(response.data.data);
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -151,6 +217,8 @@ export default function DashboardPaymentPage() {
   useEffect(() => {
     fetchPayments();
     fetchLoans();
+    fetchCustomers();
+    
   }, []);
 
   useEffect(() => {
@@ -162,6 +230,11 @@ export default function DashboardPaymentPage() {
     }
   }, [loanId]);
 
+  useEffect(() => {
+    if(customerId) {
+      fetchPaymetByCustomer(customerId);
+    }
+  } , [customerId])
   return (
     <>
       <div className="flex justify-between items-center mb-4">
@@ -250,9 +323,22 @@ export default function DashboardPaymentPage() {
 
       <div className="mb-2 flex justify-between items-center">
         <h2 className="text-lg font-semibold">Daftar Pembayaran</h2>
-        <Button variant="outline" onClick={fetchPayments} disabled={fetching}>
-          {fetching ? "Loading..." : "Refresh"}
-        </Button>
+        <div className="flex">
+          <Button variant="outline" onClick={fetchPayments} disabled={fetching}>
+            {fetching ? "Loading..." : "Refresh"}
+          </Button>
+
+          <Select onValueChange={(value) => setCustomerId(value)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select a customer" className="border border-black rounded-md" />
+            </SelectTrigger>
+            <SelectContent>
+              {customers.map((customer: any, idx: number) => (
+                <SelectItem key={idx} value={customer.id}>{customer.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <Table>
@@ -267,6 +353,7 @@ export default function DashboardPaymentPage() {
             <TableHead>Penalty</TableHead>
             <TableHead>Total</TableHead>
             <TableHead>Tanggal Transaksi</TableHead>
+            <TableHead>Sisa Hutang</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -278,7 +365,7 @@ export default function DashboardPaymentPage() {
             </TableRow>
           )}
 
-          {payments.map((payment: any, idx) => (
+          {customerId ?  paymentByCustomers.map((payment: any, idx) => (
             <TableRow key={idx}>
               <TableCell>{idx + 1}</TableCell>
               <TableCell>{payment.customer?.nik || "-"}</TableCell>
@@ -297,6 +384,7 @@ export default function DashboardPaymentPage() {
               <TableCell>
                 {(payment.penalty || 0).toLocaleString("id-ID")}
               </TableCell>
+             
               <TableCell>
                 {(
                   (payment.loan?.principalInstallment || 0) +
@@ -307,11 +395,57 @@ export default function DashboardPaymentPage() {
               <TableCell>
                 {new Date(payment.paymentDate).toLocaleDateString("id-ID")}
               </TableCell>
+              <TableCell>
+                {(payment.loan?.remainingPrincipal || 0).toLocaleString("id-ID")}
+              </TableCell>
+            </TableRow>
+          ))  :  payments.map((payment: any, idx) => (
+            <TableRow key={idx}>
+              <TableCell>{idx + 1}</TableCell>
+              <TableCell>{payment.customer?.nik || "-"}</TableCell>
+              <TableCell>{payment.customer?.name || "-"}</TableCell>
+              <TableCell>
+                {(payment.loan?.principalInstallment || 0).toLocaleString(
+                  "id-ID"
+                )}
+              </TableCell>
+              <TableCell>
+                {(payment.loan?.totalInterest || 0).toLocaleString("id-ID")}
+              </TableCell>
+              <TableCell>
+                {(payment.totalInterest || 0).toLocaleString("id-ID")}
+              </TableCell>
+              <TableCell>
+                {(payment.penalty || 0).toLocaleString("id-ID")}
+              </TableCell>
+             
+              <TableCell>
+                {(
+                  (payment.loan?.principalInstallment || 0) +
+                  (payment.totalInterest || 0) +
+                  (payment.loan?.totalInterest || 0)
+                ).toLocaleString("id-ID")}
+              </TableCell>
+              <TableCell>
+                {new Date(payment.paymentDate).toLocaleDateString("id-ID")}
+              </TableCell>
+              <TableCell>
+                {(payment.loan?.remainingPrincipal || 0).toLocaleString("id-ID")}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
         <TableFooter>
-          <TableRow>
+          {customerId ? <TableRow>
+            <TableCell>Total</TableCell>
+            <TableCell></TableCell>
+            <TableCell></TableCell>
+            <TableCell>{totalPokokPerCustomer.toLocaleString("id-ID")}</TableCell>
+            <TableCell>{totalBagiHasilPerCustomer.toLocaleString("id-ID")}</TableCell>
+            <TableCell>{totalBerjalanPerCustomer.toLocaleString("id-ID")}</TableCell>
+            <TableCell></TableCell>
+            <TableCell>{totalSemuaPerCustomer.toLocaleString("id-ID")}</TableCell>
+          </TableRow> : <TableRow>
             <TableCell>Total</TableCell>
             <TableCell></TableCell>
             <TableCell></TableCell>
@@ -320,7 +454,7 @@ export default function DashboardPaymentPage() {
             <TableCell>{totalBerjalan.toLocaleString("id-ID")}</TableCell>
             <TableCell></TableCell>
             <TableCell>{totalSemua.toLocaleString("id-ID")}</TableCell>
-          </TableRow>
+          </TableRow>}
         </TableFooter>
       </Table>
     </>
