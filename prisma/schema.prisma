@@ -49,9 +49,10 @@ model Product {
   name            String
   code            String
   description     String?
-  price           Int            @default(0)
-  cost            Int            @default(0)
-  stock           Int            @default(0)
+  priceRetail     Int            @default(0)
+  priceWholesale  Int            @default(0)
+  costRetail      Int            @default(0)
+  costWholesale   Int            @default(0)
   retailStock     Int            @default(0)
   wholesaleStock  Int            @default(0)
   retailunitId    String
@@ -223,7 +224,8 @@ model InventoryLog {
 }
 
 enum ChangeType {
-  PURCHASE
+  PURCHASE_RETAIL
+  PURCHASE_WHOLESALE
   SALE
   ADJUSTMENT
 }

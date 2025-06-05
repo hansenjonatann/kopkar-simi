@@ -76,6 +76,10 @@ export default function Sidebar() {
       label: "Sale",
       path: "/dashboard/sale",
     },
+    {
+      label: "Transaction",
+      path: "/dashboard/transaction",
+    },
   ];
 
   const adminloanandsavingsLink = [

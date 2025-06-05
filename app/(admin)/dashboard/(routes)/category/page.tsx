@@ -15,11 +15,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { TrashIcon } from "lucide-react";
 import { useRole } from "@/hooks/use-role";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function DashboardCategoryPage() {
   const [page, setPage] = useState(0);
   const [isModal, setIsModal] = useState(false);
-  const {role} = useRole()
+  const { role } = useRole();
 
   const [categories, setCategories] = useState([]);
   const [name, setName] = useState("");
@@ -83,14 +89,16 @@ export default function DashboardCategoryPage() {
       <div className={isModal ? "hidden" : "bolock"}>
         <h1 className="font-bold">{"Dashboard / Category"}</h1>
         <div className="mt-4">
-        {role == 'ADMIN' &&   <div className="flex">
-            <button
-              onClick={handleModalOpen}
-              className="bg-blue-600 text-white p-2 rounded-md"
-            >
-              Add a new Category
-            </button>
-          </div>}
+          {role == "ADMIN" && (
+            <div className="flex">
+              <button
+                onClick={handleModalOpen}
+                className="bg-blue-600 text-white p-2 rounded-md"
+              >
+                Add a new Category
+              </button>
+            </div>
+          )}
           <div className="mt-8">
             <Table>
               <TableHeader>
@@ -98,7 +106,7 @@ export default function DashboardCategoryPage() {
                   <TableHead>#</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Slug</TableHead>
-                 {role == 'ADMIN' &&  <TableHead>Actions</TableHead>}
+                  {role == "ADMIN" && <TableHead>Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -116,15 +124,17 @@ export default function DashboardCategoryPage() {
                       <TableCell>{cat.name}</TableCell>
                       <TableCell>{cat.slug}</TableCell>
 
-                     {role === 'ADMIN' &&  <TableCell>
-                        <Button
-                          variant={"destructive"}
-                          onClick={() => handleDelete(cat.id)}
-                          className=" text-white text-center font-bold px-4 rounded-md "
-                        >
-                          <TrashIcon />
-                        </Button>
-                      </TableCell>}
+                      {role === "ADMIN" && (
+                        <TableCell>
+                          <Button
+                            variant={"destructive"}
+                            onClick={() => handleDelete(cat.id)}
+                            className=" text-white text-center font-bold px-4 rounded-md "
+                          >
+                            <TrashIcon />
+                          </Button>
+                        </TableCell>
+                      )}
                     </TableRow>
                   )
                 )}
@@ -151,27 +161,27 @@ export default function DashboardCategoryPage() {
       </div>
 
       {isModal && (
-        <div className=" flex justify-center items-center h-screen">
-          <div className=" w-80 h-[200px]  bg-white text-primary rounded-md">
-            <div className="flex flex-col m-3 ">
-              <h1 className="font-bold">Add New Category Form</h1>
-              <form onSubmit={handleCreateCategory} method="POST">
-                <CustomForm
-                  label="Name"
-                  type="text"
-                  name="name"
-                  onchange={(e) => setName(e.target.value)}
-                />
-                <button
-                  type="submit"
-                  className="w-full bg-blue-800 text-white font-bold p-2 rounded-lg"
-                >
-                  {loading ? "Saving..." : "Save"}
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
+        <Dialog open={isModal}>
+          <DialogHeader>
+            <DialogTitle>Add a new category</DialogTitle>
+          </DialogHeader>
+          <DialogContent>
+            <form onSubmit={handleCreateCategory} method="POST">
+              <CustomForm
+                label="Name"
+                type="text"
+                name="name"
+                onchange={(e) => setName(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="w-full bg-blue-800 text-white font-bold p-2 rounded-lg"
+              >
+                {loading ? "Saving..." : "Save"}
+              </button>
+            </form>
+          </DialogContent>
+        </Dialog>
       )}
     </>
   );

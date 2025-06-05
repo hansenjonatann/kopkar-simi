@@ -79,7 +79,7 @@ export const POST = async (req: NextRequest) => {
     for (const item of body.items) {
       await db.product.update({
         where: { id: item.productId },
-        data: { stock: { decrement: item.quantity } },
+        data: { retailStock: { decrement: item.quantity } },
       });
     }
 
